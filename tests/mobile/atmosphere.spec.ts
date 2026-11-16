@@ -1,0 +1,60 @@
+import { test, expect } from '@playwright/test';
+
+test('3D: день, ночь, качество, камера, жесты и прежнее сохранение', async ({ page, context }) => {
+  const errors: string[] = []; page.on('pageerror', e => errors.push(e.message));
+  await page.goto('/'); await page.getByRole('button', { name: 'Пауза', exact: true }).click();
+  await page.evaluate(() => window.dispatchEvent(new Event('pagehide')));
+  const saved = await page.evaluate(() => localStorage.getItem('gorodskoy-marshrut:stage2:v2'));
+  await page.locator('#settings').click(); await page.locator('#time-of-day').selectOption('day');
+  await page.locator('#quality').selectOption('high'); await page.locator('#close').click();
+  await page.locator('#debug-toggle').click(); await expect(page.locator('#debug')).toHaveText(/^[1-9]\d* FPS/);
+  await page.screenshot({ path: 'artifacts/city-day.png' });
+  const stats = await page.locator('#debug').textContent(); console.log('GRAPHICS_CITY_DAY', stats);
+  const budget = stats!.match(/(\d+) calls · (\d+) triangles/)!;
+  expect(Number(budget[1])).toBeLessThanOrEqual(150); expect(Number(budget[2])).toBeLessThanOrEqual(200000);
+  const stop = page.getByRole('button', { name: 'Больница', exact: true });
+  const original = (await stop.boundingBox())!;
+  await page.locator('#rotate-right').click();
+  await expect.poll(async () => Math.abs((await stop.boundingBox())!.x - original.x)).toBeGreaterThan(5);
+  await page.locator('#recenter').click();
+  await expect.poll(async () => Math.abs((await stop.boundingBox())!.x - original.x)).toBeLessThan(1);
+  await page.mouse.move(5, 310); await page.mouse.down(); await page.mouse.move(65, 340, { steps: 8 }); await page.mouse.up();
+  await expect.poll(async () => Math.abs((await stop.boundingBox())!.x - original.x)).toBeGreaterThan(10);
+  await page.locator('#recenter').click();
+  await page.getByRole('button', { name: 'Маршруты', exact: true }).click(); await page.locator('[data-edit="1"]').click();
+  const selected = await page.locator('#selection').textContent();
+  const cdp = await context.newCDPSession(page);
+  await cdp.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [{ x: 140, y: 350, id: 1 }, { x: 230, y: 400, id: 2 }] });
+  await cdp.send('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: [{ x: 105, y: 320, id: 1 }, { x: 260, y: 420, id: 2 }] });
+  await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
+  await expect(page.locator('#selection')).toHaveText(selected!); await page.locator('#cancel').click();
+  await page.getByRole('button', { name: 'Карта', exact: true }).click(); await page.locator('#recenter').click();
+  await page.locator('#settings').click(); await page.locator('#time-of-day').selectOption('night'); await page.locator('#quality').selectOption('low');
+  await page.locator('#close').click(); await page.locator('#layer').selectOption('load');
+  await page.screenshot({ path: 'artifacts/city-night.png' });
+  await page.setViewportSize({ width: 844, height: 390 }); await page.screenshot({ path: 'artifacts/city-night-landscape.png' });
+  console.log('GRAPHICS_CITY_NIGHT', await page.locator('#debug').textContent());
+  expect(await page.evaluate(() => localStorage.getItem('gorodskoy-marshrut:stage2:v2'))).toBe(saved);
+  await page.reload(); await page.locator('#settings').click(); await expect(page.locator('#quality')).toHaveValue('low');
+  await expect(page.locator('#time-of-day')).toHaveValue('night'); await expect(page.locator('#sound')).not.toBeChecked();
+  expect(errors).toEqual([]);
+});
+
+test('звук включается касанием, выключается, останавливается в фоне и работает офлайн', async ({ page, context }) => {
+  const errors: string[] = []; page.on('pageerror', e => errors.push(e.message));
+  await page.addInitScript(() => {
+    const Original = window.AudioContext;
+    window.AudioContext = class extends Original { constructor() { super(); (window as any).__testAudio = this; } };
+  });
+  await page.goto('/'); expect(await page.evaluate(() => Boolean((window as any).__testAudio))).toBe(false);
+  await page.locator('#settings').click(); await context.setOffline(true); await page.locator('#sound').check();
+  await expect.poll(() => page.evaluate(() => (window as any).__testAudio?.state)).toBe('running');
+  await page.locator('#sound').uncheck(); await expect.poll(() => page.evaluate(() => (window as any).__testAudio?.state)).toBe('suspended');
+  await page.locator('#sound').check(); await page.locator('#close').click();
+  await page.evaluate(() => { Object.defineProperty(document, 'hidden', { configurable: true, value: true }); document.dispatchEvent(new Event('visibilitychange')); });
+  await expect.poll(() => page.evaluate(() => (window as any).__testAudio?.state)).toBe('suspended');
+  await page.evaluate(() => { Object.defineProperty(document, 'hidden', { configurable: true, value: false }); document.dispatchEvent(new Event('visibilitychange')); });
+  await expect.poll(() => page.evaluate(() => (window as any).__testAudio?.state)).toBe('running');
+  await context.setOffline(false); await page.reload(); await page.locator('#settings').click(); await expect(page.locator('#sound')).toBeChecked();
+  expect(errors).toEqual([]);
+});

@@ -1,4 +1,5 @@
 import { t, number } from '../core/i18n';
+import type { Settings } from '../core/settings';
 import { E } from '../sim/config';
 import { constructionCost } from '../sim/commands';
 import { routesPanel, fleetPanel, financePanel } from './panels';
@@ -12,6 +13,9 @@ export class GameUI {
   onConfirm: () => void = () => {};
   onSpeed: (speed: number) => void = () => {};
   onReset: () => void = () => {};
+  onSettings: (settings: Settings) => void = () => {};
+  onRotate: (delta: number) => void = () => {};
+  private settings: Settings = { version: 1, quality: 'medium', time: 'auto', sound: false };
   onZoom: (factor: number) => void = () => {};
   onRecenter: () => void = () => {};
   onLayer: (layer: string) => void = () => {};
@@ -25,11 +29,11 @@ export class GameUI {
   mode: Mode='marshrutka';
   readonly mapHost: HTMLElement;
   constructor(host: HTMLElement) {
-    host.innerHTML=`<div id="map"></div><header><div class="city-name"><b>${t('city')}</b><small id="date"></small></div><button id="help" aria-label="${t('help')}">?</button></header>
+    host.innerHTML=`<div id="map"></div><header><div class="city-name"><b>${t('city')}</b><small id="date"></small></div><div class="header-actions"><button id="settings" aria-label="${t('settings')}">⚙</button><button id="help" aria-label="${t('help')}">?</button></div></header>
       <section class="stats">${['budget','population','satisfaction','trust','ecology'].map(key=>`<article><small>${t(key)}</small><strong id="${key}"></strong></article>`).join('')}</section>
       <div class="map-tools"><select id="layer" aria-label="${t('layerLabel')}">${['off','demand','load','complaints'].map(key=>`<option value="${key}">${t(key)}</option>`).join('')}</select><button id="debug-toggle" aria-label="${t('debug')}">FPS</button></div><output id="layer-legend" hidden></output>
       <button id="event-banner"></button><div id="crisis" hidden></div>
-      <div class="zoom"><button id="zoom-in" aria-label="${t('zoomIn')}">+</button><button id="zoom-out" aria-label="${t('zoomOut')}">−</button><button id="recenter" aria-label="${t('recenter')}">⌖</button></div><output id="debug" hidden></output>
+      <div class="zoom"><div class="rotate-tools"><button id="rotate-left" aria-label="${t('rotateLeft')}">↶</button><button id="rotate-right" aria-label="${t('rotateRight')}">↷</button></div><button id="zoom-in" aria-label="${t('zoomIn')}">+</button><button id="zoom-out" aria-label="${t('zoomOut')}">−</button><button id="recenter" aria-label="${t('recenter')}">⌖</button></div><output id="debug" hidden></output>
       <div class="map-bottom"><span id="growth"></span><div class="speed">${[0,1,2].map(n=>`<button data-speed="${n}" class="${n===1?'active':''}" aria-label="${n===0?t('pause'):t('speed')+' '+n}">${n===0?'Ⅱ':n+'×'}</button>`).join('')}</div></div>
       <aside hidden><div class="panel-top"><b id="panel-title"></b><button id="panel-close" aria-label="${t('close')}">×</button></div><div id="panel"></div></aside>
       <div id="build-bar" hidden><b id="build-hint"></b><small>${t('draftHint')}</small><div id="selection"></div><div class="draft-tools"><select id="draft-end"><option value="end">${t('appendEnd')}</option><option value="start">${t('appendStart')}</option></select><button id="undo">↶</button><button id="clear-draft">${t('clearDraft')}</button></div><div class="build-actions"><button id="cancel">${t('cancel')}</button><button id="confirm" class="primary"></button></div></div>
@@ -37,6 +41,13 @@ export class GameUI {
       <dialog id="modal"><div id="dialog-body"></div><button id="close">${t('close')}</button></dialog><div id="toast" role="status"></div>`;
     this.mapHost=document.querySelector('#map')!;this.modal=document.querySelector('#modal')!;
     const click=(id:string,fn:()=>void)=>{document.getElementById(id)!.onclick=fn;};
+    click('settings',()=>this.showSettings());
+    click('rotate-left',()=>this.onRotate(-Math.PI/6));click('rotate-right',()=>this.onRotate(Math.PI/6));
+    this.modal.addEventListener('change',e=>{
+      const target=e.target as HTMLElement;if(!target.closest('#settings-form'))return;
+      this.settings={version:1,quality:document.querySelector<HTMLSelectElement>('#quality')!.value as Settings['quality'],time:document.querySelector<HTMLSelectElement>('#time-of-day')!.value as Settings['time'],sound:document.querySelector<HTMLInputElement>('#sound')!.checked};
+      this.onSettings({...this.settings});
+    });
     click('help',()=>this.showDialog(`<h2>${t('help')}</h2><p>${t('helpText')}</p><button id="reset">${t('reset')}</button>`));
     this.modal.addEventListener('click',e=>{if((e.target as HTMLElement).id==='reset'){
       this.showDialog(`<h2>${t('resetTitle')}</h2><p>${t('resetText')}</p><button id="reset-confirm" class="primary">${t('resetConfirm')}</button>`);
@@ -73,6 +84,15 @@ export class GameUI {
       if(b.dataset.edit||b.dataset.extend)this.onEdit(Number(b.dataset.edit??b.dataset.extend));
       if(b.dataset.remove){const id=Number(b.dataset.remove);this.showDialog(`<h2>${t('removeTitle',{id})}</h2><p>${t('removeText')}</p><button id="remove-confirm" class="primary">${t('removeConfirm')}</button>`);click('remove-confirm',()=>{this.onCommand({type:'removeRoute',routeId:id});this.modal.close();});}
     };
+  }
+  setSettings(settings: Settings){
+    this.settings={...settings};
+    const quality=document.querySelector<HTMLSelectElement>('#quality'),time=document.querySelector<HTMLSelectElement>('#time-of-day'),sound=document.querySelector<HTMLInputElement>('#sound');
+    if(quality)quality.value=settings.quality;if(time)time.value=settings.time;if(sound)sound.checked=settings.sound;
+  }
+  private showSettings(){
+    this.showDialog(`<h2>${t('settings')}</h2><div id="settings-form"><label>${t('quality')}<select id="quality">${['low','medium','high'].map(key=>`<option value="${key}">${t('quality'+key[0].toUpperCase()+key.slice(1))}</option>`).join('')}</select></label><p>${t('qualityHint')}</p><label>${t('timeOfDay')}<select id="time-of-day">${['auto','day','night'].map(key=>`<option value="${key}">${t('time'+key[0].toUpperCase()+key.slice(1))}</option>`).join('')}</select></label><label class="sound-setting"><input id="sound" type="checkbox">${t('sound')}</label><p>${t('soundHint')}</p><p>${t('cameraHint')}</p></div>`);
+    this.setSettings(this.settings);
   }
   openPanel(tab:string){
     this.tab=tab==='map'?'':tab;document.querySelector('aside')!.hidden=!this.tab;
