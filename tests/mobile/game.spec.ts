@@ -16,9 +16,9 @@ test('карта на весь экран, редактор, автопарк, �
   await page.getByRole('button',{name:'Создать маршрут',exact:false}).click();
   await page.getByRole('button',{name:'Больница',exact:true}).click();await page.getByRole('button',{name:'Заречье',exact:true}).click();
   await expect(page.locator('#confirm')).toContainText('4 000');await page.locator('#confirm').click();
-  await expect(page.locator('.route-card')).toHaveCount(2);
+  await expect(page.locator('.route-card')).toHaveCount(2);await page.screenshot({path:'artifacts/routes.png'});
   await page.locator('[data-extend="2"]').click();await page.getByRole('button',{name:'Парк',exact:true}).click();
-  await expect(page.locator('#confirm')).toContainText('500');await page.locator('#confirm').click();
+  await page.screenshot({path:'artifacts/editor.png'});await expect(page.locator('#confirm')).toContainText('500');await page.locator('#confirm').click();
   await expect(page.locator('.route-card').nth(1)).toContainText('Больница → Заречье → Парк');
   await page.locator('[data-edit="2"]').click();await page.locator('#clear-draft').click();
   await page.getByRole('button',{name:'Заречье',exact:true}).click();await page.getByRole('button',{name:'Больница',exact:true}).click();

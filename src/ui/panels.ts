@@ -25,7 +25,7 @@ export function fleetPanel(w: World): string {
   }).join('');
 }
 export function financePanel(w: World): string {
-  return `<h2>${t('finance')}</h2><p>${t('fare',{cost:w.fare})}</p><form id="fare-form"><label for="fare-input">${t('fareLabel')}</label><div class="fare-row"><input id="fare-input" type="number" min="${E.fareMin}" max="${E.fareMax}" step="1" value="${w.fare}" required><button class="primary">${t('fareSave')}</button></div></form>
+  return `<h2>${t('finance')}</h2><strong>${number(w.money)} ₽</strong><p>${t('fare',{cost:w.fare})}</p><form id="fare-form"><label for="fare-input">${t('fareLabel')}</label><div class="fare-row"><input id="fare-input" type="number" min="${E.fareMin}" max="${E.fareMax}" step="1" value="${w.fare}" required><button class="primary">${t('fareSave')}</button></div></form>
     <p>${t('fareHint',{min:E.fareMin,max:E.fareMax})}</p><p>${t('debt',{cost:number(w.debt)})}<br>${t('loanTerms',{rate:E.loanDailyInterest*100})}</p><div class="route-actions"><button data-action="loan" ${w.debt>=E.loanMax?'disabled':''}>${t('takeLoan',{cost:number(E.loanAmount)})}</button><button data-action="repay" ${!w.debt?'disabled':''}>${t('repayLoan',{cost:number(E.loanAmount)})}</button></div>
     <h3>${t('financeTotal')}</h3><article class="finance-row">${t('income')}<strong>${number(w.income)} ₽</strong></article><article class="finance-row">${t('expenses')}<strong>${number(w.expenses)} ₽</strong></article>`+
     Object.entries(w.ledger).map(([key,value])=>`<div class="ledger-row"><span>${t(key)}</span><b>${number(value)} ₽</b></div>`).join('');

@@ -165,5 +165,5 @@
   "routeBlocked": "Остановлена ремонтом",
   "routeHeadway": "Интервал: {count} мин",
   "financeTotal": "За всё время",
-  "layerStop": "{name} · {count}"
+  "layerStop": "{name}\n{count}"
 }

@@ -65,7 +65,7 @@ export class CityMap {
     for(const d of D.districts) {
       const stop = new THREE.Mesh(new THREE.CylinderGeometry(0.18,0.18,0.06,16),flat('#31896b'));
       stop.position.set(d.x,0.12,d.y); this.stops.push(stop);this.scene.add(stop);
-      const label=document.createElement('button'); label.className='stop-label'; label.textContent=t(d.name);
+      const label=document.createElement('button'); label.className='stop-label'; label.textContent=t(d.name);label.setAttribute('aria-label',t(d.name));
       label.onclick=()=>this.onStop(d.id); host.append(label); this.labels.push(label);
     }
     this.scene.add(this.lines);
@@ -152,6 +152,7 @@ export class CityMap {
       this.stops[d.id].scale.setScalar(draft.includes(d.id)?1.6:1);
       const count=this.layer==='demand'?number(generated):this.layer==='load'?number(load*100)+'%':number(complaint*100)+'%';
       this.labels[d.id].textContent=this.layer==='off'?t(d.name):t('layerStop',{name:t(d.name),count});
+      this.labels[d.id].title=this.labels[d.id].textContent??'';
       this.labels[d.id].classList.toggle('selected',draft.includes(d.id));
     }
     this.heat.instanceMatrix.needsUpdate=true;if(this.heat.instanceColor)this.heat.instanceColor.needsUpdate=true;
@@ -174,7 +175,7 @@ export class CityMap {
       }
     });
     this.cars.count=car;this.cars.instanceMatrix.needsUpdate=true;if(this.cars.instanceColor)this.cars.instanceColor.needsUpdate=true;
-    for(const d of world.districts){this.projected.set(d.x,0.2,d.y).project(this.camera);const label=this.labels[d.id];label.style.left=`${(this.projected.x+1)*this.width/2}px`;label.style.top=`${(-this.projected.y+1)*this.height/2}px`;label.hidden=Math.abs(this.projected.x)>1||Math.abs(this.projected.y)>1;}
+    for(const d of world.districts){this.projected.set(d.x,0.2,d.y).project(this.camera);const label=this.labels[d.id];label.style.maxWidth=`${Math.max(44,Math.min(160,3*this.width/(this.camera.right-this.camera.left)-4))}px`;label.style.left=`${(this.projected.x+1)*this.width/2}px`;label.style.top=`${(-this.projected.y+1)*this.height/2}px`;label.hidden=Math.abs(this.projected.x)>1||Math.abs(this.projected.y)>1;}
     this.renderer.render(this.scene,this.camera);this.frames++;
     const wallTime = performance.now() / 1000;
     if(wallTime-this.lastCounter>=1){this.fps=Math.round(this.frames/(wallTime-this.lastCounter));this.frames=0;this.lastCounter=wallTime;}

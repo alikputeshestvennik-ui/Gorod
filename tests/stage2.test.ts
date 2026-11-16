@@ -27,6 +27,7 @@ describe('редактирование маршрутов и типы транс
     expect(reserved(w)).toBe(0);applyCommand(w,{type:'removeRoute',routeId:1});expect(reserved(w)).toBe(2);
   });
   it('разделяет резерв и вместимость разных типов и открывает электротранспорт по потребности',()=>{
+    const empty=createWorld();empty.districts.forEach(d=>d.population=0);expect(unlocked(empty,'bus')).toBe(false);
     const w=createWorld();expect(unlocked(w,'bus')).toBe(true);expect(unlocked(w,'tram')).toBe(false);
     const old=getSnapshot(w);expect(applyCommand(w,{type:'buyVehicle',mode:'tram'}).ok).toBe(false);expect(w).toEqual(old);
     expect(applyCommand(w,{type:'buyVehicle',mode:'bus'}).ok).toBe(true);

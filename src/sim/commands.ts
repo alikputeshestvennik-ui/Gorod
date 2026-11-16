@@ -3,7 +3,7 @@ import { routeLength } from './demand';
 import type { Command, Mode, Result, World } from './types';
 export const routeCost = (count: number) => E.routeBaseCost + count * E.stopCost;
 export const reserved = (w: World, mode?: Mode) => mode ? w.fleets[mode] - w.routes.filter(r=>r.mode===mode).reduce((s,r)=>s+r.vehicles,0) : w.fleet-w.routes.reduce((s,r)=>s+r.vehicles,0);
-export const unlocked = (w: World, mode: Mode) => w.districts.reduce((s,d)=>s+d.population,0) >= T[mode].unlockPopulation || w.served >= T[mode].unlockServed;
+export const unlocked = (w: World, mode: Mode) => w.districts.reduce((s,d)=>s+d.population,0) >= T[mode].unlockPopulation || (T[mode].unlockServed>0 && w.served >= T[mode].unlockServed);
 const validStops = (w: World, ids: number[]) => Array.isArray(ids) && ids.length >= 2 && ids.length <= w.districts.length && new Set(ids).size===ids.length && ids.every(id=>Number.isInteger(id)&&!!w.districts[id]);
 export function constructionCost(w: World, stops: number[], mode: Mode, routeId?: number): number {
   const old = w.routes.find(r=>r.id===routeId);
