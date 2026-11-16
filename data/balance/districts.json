@@ -1,0 +1,239 @@
+{
+  "colors": [
+    "#31896b",
+    "#d68f46",
+    "#6e86ba",
+    "#a476a5",
+    "#8e9c55",
+    "#4a9ca7"
+  ],
+  "originWeights": {
+    "residential": [
+      1.7,
+      0.8,
+      0.6,
+      0.35
+    ],
+    "business": [
+      0.5,
+      0.8,
+      1.8,
+      0.3
+    ],
+    "industrial": [
+      0.6,
+      0.8,
+      1.7,
+      0.4
+    ],
+    "commercial": [
+      0.7,
+      1.2,
+      1.2,
+      0.6
+    ],
+    "leisure": [
+      0.4,
+      1.1,
+      1.3,
+      0.6
+    ]
+  },
+  "destinationWeights": {
+    "residential": [
+      0.5,
+      0.8,
+      1.8,
+      0.5
+    ],
+    "business": [
+      1.8,
+      1.1,
+      0.5,
+      0.2
+    ],
+    "industrial": [
+      1.7,
+      0.9,
+      0.5,
+      0.3
+    ],
+    "commercial": [
+      0.7,
+      1.4,
+      1.1,
+      0.4
+    ],
+    "leisure": [
+      0.4,
+      1.2,
+      1.5,
+      0.5
+    ]
+  },
+  "weekendDestinationWeights": {
+    "residential": 0.9,
+    "business": 0.35,
+    "industrial": 0.45,
+    "commercial": 1.5,
+    "leisure": 1.8
+  },
+  "districts": [
+    {
+      "id": 0,
+      "name": "station",
+      "type": "commercial",
+      "x": 1,
+      "y": 10,
+      "population": 100,
+      "jobs": 550,
+      "pull": 1.6,
+      "density": 0.35,
+      "landValue": 0.35,
+      "accessibility": 0
+    },
+    {
+      "id": 1,
+      "name": "oldTown",
+      "type": "residential",
+      "x": 1,
+      "y": 7,
+      "population": 1600,
+      "jobs": 160,
+      "pull": 1.1,
+      "density": 0.35,
+      "landValue": 0.35,
+      "accessibility": 0
+    },
+    {
+      "id": 2,
+      "name": "square",
+      "type": "business",
+      "x": 4,
+      "y": 7,
+      "population": 400,
+      "jobs": 900,
+      "pull": 1.5,
+      "density": 0.35,
+      "landValue": 0.35,
+      "accessibility": 0
+    },
+    {
+      "id": 3,
+      "name": "market",
+      "type": "commercial",
+      "x": 4,
+      "y": 4,
+      "population": 200,
+      "jobs": 500,
+      "pull": 1.4,
+      "density": 0.35,
+      "landValue": 0.35,
+      "accessibility": 0
+    },
+    {
+      "id": 4,
+      "name": "factory",
+      "type": "industrial",
+      "x": 1,
+      "y": 1,
+      "population": 100,
+      "jobs": 1100,
+      "pull": 1.3,
+      "density": 0.35,
+      "landValue": 0.35,
+      "accessibility": 0
+    },
+    {
+      "id": 5,
+      "name": "university",
+      "type": "business",
+      "x": 7,
+      "y": 1,
+      "population": 200,
+      "jobs": 850,
+      "pull": 1.2,
+      "density": 0.35,
+      "landValue": 0.35,
+      "accessibility": 0
+    },
+    {
+      "id": 6,
+      "name": "hospital",
+      "type": "business",
+      "x": 7,
+      "y": 4,
+      "population": 200,
+      "jobs": 500,
+      "pull": 1.4,
+      "density": 0.35,
+      "landValue": 0.35,
+      "accessibility": 0
+    },
+    {
+      "id": 7,
+      "name": "riverside",
+      "type": "residential",
+      "x": 10,
+      "y": 4,
+      "population": 1200,
+      "jobs": 80,
+      "pull": 1.2,
+      "density": 0.35,
+      "landValue": 0.35,
+      "accessibility": 0
+    },
+    {
+      "id": 8,
+      "name": "north",
+      "type": "residential",
+      "x": 10,
+      "y": 1,
+      "population": 700,
+      "jobs": 100,
+      "pull": 1,
+      "density": 0.35,
+      "landValue": 0.35,
+      "accessibility": 0
+    },
+    {
+      "id": 9,
+      "name": "park",
+      "type": "leisure",
+      "x": 10,
+      "y": 7,
+      "population": 100,
+      "jobs": 80,
+      "pull": 0.8,
+      "density": 0.35,
+      "landValue": 0.35,
+      "accessibility": 0
+    },
+    {
+      "id": 10,
+      "name": "embankment",
+      "type": "business",
+      "x": 7,
+      "y": 10,
+      "population": 100,
+      "jobs": 650,
+      "pull": 1.1,
+      "density": 0.35,
+      "landValue": 0.35,
+      "accessibility": 0
+    },
+    {
+      "id": 11,
+      "name": "south",
+      "type": "residential",
+      "x": 4,
+      "y": 10,
+      "population": 100,
+      "jobs": 80,
+      "pull": 1,
+      "density": 0.35,
+      "landValue": 0.35,
+      "accessibility": 0
+    }
+  ]
+}

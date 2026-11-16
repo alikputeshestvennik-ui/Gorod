@@ -1,0 +1,11 @@
+{
+  "marshrutka": {
+    "capacity": 12,
+    "price": 18000,
+    "activeCostPerHour": 210,
+    "reserveCostPerHour": 35,
+    "minutesPerUnit": 2,
+    "turnaroundMinutes": 2,
+    "maxBoardingsPerTick": 12
+  }
+}

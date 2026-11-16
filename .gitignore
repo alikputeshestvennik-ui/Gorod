@@ -1,0 +1,13 @@
+__pycache__/
+*.pyc
+node_modules/
+dist/
+android/.gradle/
+android/**/build/
+android/local.properties
+*.keystore
+*.jks
+.artifacts/
+artifacts/
+playwright-report/
+test-results/
