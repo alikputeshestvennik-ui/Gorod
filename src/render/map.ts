@@ -49,14 +49,14 @@ export class CityMap {
     this.renderer.setPixelRatio(Math.min(devicePixelRatio || 1, 2));
     this.renderer.domElement.setAttribute('aria-label', t('mapLabel'));
     host.append(this.renderer.domElement);
-    this.controls = new MapCamera(this.renderer.domElement); this.controls.onStop = id => this.onStop(id);
+    this.controls = new MapCamera(this.renderer.domElement,host); this.controls.onStop = id => this.onStop(id);
     this.scenery = new Scenery(this.scene); this.atmosphere = new Atmosphere(this.scene, this.scenery.windows);
     const flat = (color: string) => new THREE.MeshBasicMaterial({ color });
     for(const d of D.districts) {
       const stop = new THREE.Mesh(new THREE.CylinderGeometry(0.18,0.18,0.06,16),flat('#31896b'));
       stop.position.set(d.x,0.17,d.y); this.stops.push(stop);this.scene.add(stop);
       const label=document.createElement('button'); label.className='stop-label'; label.textContent=t(d.name);label.setAttribute('aria-label',t(d.name));
-      label.onclick=()=>this.onStop(d.id); host.append(label); this.labels.push(label);
+      label.dataset.stop=String(d.id);label.onclick=e=>{if(e.detail===0)this.onStop(d.id);}; host.append(label); this.labels.push(label);
     }
     this.scene.add(this.lines);
     this.heat=new THREE.InstancedMesh(new THREE.CircleGeometry(0.8,16),new THREE.MeshBasicMaterial({transparent:true,opacity:0.38,depthWrite:false,depthTest:false}),D.districts.length);
@@ -126,20 +126,21 @@ export class CityMap {
     this.daylight=this.atmosphere.update(world.minute,this.time);
     const limit=this.quality==='low'?24:this.quality==='medium'?40:60;
     let car=0;const event=eventConfig(world);
-    world.routes.forEach((r,i)=>{
-      if(event?.id==='repair'&&r.stops.includes(event.district))return;
-      const path=this.paths[i],length=this.lengths[i];if(!path?.length||!length)return;
+    for(let i=0;i<world.routes.length;i++){
+      const r=world.routes[i];
+      if(event?.id==='repair'&&r.stops.includes(event.district))continue;
+      const path=this.paths[i],length=this.lengths[i];if(!path?.length||!length)continue;
       for(let v=0;v<r.vehicles&&car<limit;v++){
-        let progress=(time*0.5*(event?.speed??1)+v*length/Math.max(1,r.vehicles))%(length*2);if(progress>length)progress=length*2-progress;
+        let progress=(time*0.5*(event?.speed??1)+v*length/Math.max(1,r.vehicles))%(length*2);const reverse=progress>length;if(reverse)progress=length*2-progress;
         for(let k=1;k<path.length;k++){
           const segment=path[k].distanceTo(path[k-1]);
           if(progress>segment){progress-=segment;continue;}
           this.point.copy(path[k-1]).lerp(path[k],segment?progress/segment:0);this.point.y=0.23;
-          this.matrix.makeRotationY(Math.atan2(path[k].x-path[k-1].x,path[k].z-path[k-1].z));this.scale.set(r.mode==='marshrutka'?1:1.3,1,r.mode==='tram'?2:r.mode==='marshrutka'?1:1.6);this.matrix.scale(this.scale);
+          this.matrix.makeRotationY(Math.atan2(path[k].x-path[k-1].x,path[k].z-path[k-1].z)+(reverse?Math.PI:0));this.scale.set(r.mode==='marshrutka'?1:1.3,1,r.mode==='tram'?2:r.mode==='marshrutka'?1:1.6);this.matrix.scale(this.scale);
           this.matrix.setPosition(this.point);this.cars.setMatrixAt(car,this.matrix);this.carWindows.setMatrixAt(car,this.matrix);this.carWheels.setMatrixAt(car,this.matrix);this.tint.set(D.colors[(r.id-1)%D.colors.length]);this.cars.setColorAt(car++,this.tint);break;
         }
       }
-    });
+    }
     this.carWindows.count=this.carWheels.count=car;this.carWindows.instanceMatrix.needsUpdate=true;this.carWheels.instanceMatrix.needsUpdate=true;
     this.cars.count=car;this.cars.instanceMatrix.needsUpdate=true;if(this.cars.instanceColor)this.cars.instanceColor.needsUpdate=true;
     let people=0;

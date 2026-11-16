@@ -19,10 +19,10 @@ export class MapCamera {
   private pointer = new THREE.Vector2();
   private point = new THREE.Vector3();
   private pointers = new Map<number, { x: number; y: number }>();
-  private drag: { x: number; y: number; moved: boolean; multi: boolean } | null = null;
+  private drag: { x: number; y: number; moved: boolean; multi: boolean; stop: number | null } | null = null;
   building = false;
   onStop: (id: number) => void = () => {};
-  constructor(private canvas: HTMLCanvasElement) { this.bind(); }
+  constructor(private canvas: HTMLCanvasElement, private surface: HTMLElement = canvas) { this.bind(); }
   resize(width: number, height: number) { this.width = width; this.height = height; this.update(1); }
   changeZoom(factor: number) { this.zoomTarget = THREE.MathUtils.clamp(this.zoomTarget * factor, 0.7, 3.5); }
   rotate(delta: number) { this.angleTarget += delta; }
@@ -39,6 +39,10 @@ export class MapCamera {
     this.camera.lookAt(this.center); this.camera.updateProjectionMatrix(); this.camera.updateMatrixWorld();
   }
   private pick(x: number, y: number): number | null {
+    const hit = this.surface.ownerDocument?.elementFromPoint(x, y);
+    const label = hit?.closest<HTMLElement>('[data-stop]');
+    if (label && this.surface.contains(label)) return Number(label.dataset.stop);
+    if (hit && !this.surface.contains(hit)) return null;
     const rect = this.canvas.getBoundingClientRect();
     this.pointer.set((x - rect.left) / rect.width * 2 - 1, -(y - rect.top) / rect.height * 2 + 1);
     this.ray.setFromCamera(this.pointer, this.camera);
@@ -55,12 +59,15 @@ export class MapCamera {
     this.target.x = THREE.MathUtils.clamp(this.target.x, -1, 12); this.target.z = THREE.MathUtils.clamp(this.target.z, -1, 12);
   }
   private bind() {
-    this.canvas.addEventListener('pointerdown', e => {
+    this.surface.addEventListener('pointerdown', e => {
       this.canvas.setPointerCapture(e.pointerId); this.pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
-      if (this.pointers.size === 1) this.drag = { x: e.clientX, y: e.clientY, moved: false, multi: false };
+      if (this.pointers.size === 1) {
+        const stop = (e.target as HTMLElement).closest?.<HTMLElement>('[data-stop]')?.dataset.stop;
+        this.drag = { x: e.clientX, y: e.clientY, moved: false, multi: false, stop: stop === undefined ? null : Number(stop) };
+      }
       else if (this.drag) this.drag.multi = true;
     });
-    this.canvas.addEventListener('pointermove', e => {
+    this.surface.addEventListener('pointermove', e => {
       const previous = this.pointers.get(e.pointerId); if (!previous || !this.drag) return;
       const dx = e.clientX - previous.x, dy = e.clientY - previous.y;
       if (this.pointers.size === 2) {
@@ -76,7 +83,7 @@ export class MapCamera {
       } else if (!this.drag.multi) {
         if (!this.drag.moved && Math.hypot(e.clientX - this.drag.x, e.clientY - this.drag.y) > 8) {
           this.drag.moved = true;
-          if (this.building) { const id = this.pick(this.drag.x, this.drag.y); if (id !== null) this.onStop(id); }
+          if (this.building) { const id = this.drag.stop ?? this.pick(this.drag.x, this.drag.y); if (id !== null) this.onStop(id); }
         }
         if (this.drag.moved) {
           if (this.building) { const id = this.pick(e.clientX, e.clientY); if (id !== null) this.onStop(id); }
@@ -86,10 +93,10 @@ export class MapCamera {
       previous.x = e.clientX; previous.y = e.clientY;
     });
     const end = (e: PointerEvent) => {
-      if (e.type === 'pointerup' && this.drag && !this.drag.moved && !this.drag.multi) { const id = this.pick(e.clientX, e.clientY); if (id !== null) this.onStop(id); }
+      if (e.type === 'pointerup' && this.drag && !this.drag.moved && !this.drag.multi) { const id = this.drag.stop ?? this.pick(e.clientX, e.clientY); if (id !== null) this.onStop(id); }
       this.pointers.delete(e.pointerId); if (!this.pointers.size) this.drag = null;
     };
-    this.canvas.addEventListener('pointerup', end); this.canvas.addEventListener('pointercancel', end);
+    this.surface.addEventListener('pointerup', end); this.surface.addEventListener('pointercancel', end);
     this.canvas.addEventListener('lostpointercapture', e => { this.pointers.delete(e.pointerId); if (!this.pointers.size) this.drag = null; });
     this.canvas.addEventListener('wheel', e => { e.preventDefault(); this.changeZoom(e.deltaY < 0 ? 1.1 : 1 / 1.1); }, { passive: false });
   }

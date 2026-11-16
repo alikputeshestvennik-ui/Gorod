@@ -8,6 +8,7 @@ test('3D: день, ночь, качество, камера, жесты и пр
   await page.locator('#settings').click(); await page.locator('#time-of-day').selectOption('day');
   await page.locator('#quality').selectOption('high'); await page.locator('#close').click();
   await page.locator('#debug-toggle').click(); await expect(page.locator('#debug')).toHaveText(/^[1-9]\d* FPS/);
+  await page.waitForTimeout(1800); // Let shaders and the FPS sampling window settle.
   await page.screenshot({ path: 'artifacts/city-day.png' });
   const stats = await page.locator('#debug').textContent(); console.log('GRAPHICS_CITY_DAY', stats);
   const budget = stats!.match(/(\d+) calls · (\d+) triangles/)!;
@@ -22,6 +23,12 @@ test('3D: день, ночь, качество, камера, жесты и пр
   await expect.poll(async () => Math.abs((await stop.boundingBox())!.x - original.x)).toBeGreaterThan(10);
   await page.locator('#recenter').click();
   await page.getByRole('button', { name: 'Маршруты', exact: true }).click(); await page.locator('[data-edit="1"]').click();
+  await page.locator('#clear-draft').click();
+  const hospital = (await page.getByRole('button', { name: 'Больница', exact: true }).boundingBox())!;
+  const riverside = (await page.getByRole('button', { name: 'Заречье', exact: true }).boundingBox())!;
+  await page.mouse.move(hospital.x + hospital.width / 2, hospital.y + hospital.height / 2); await page.mouse.down();
+  await page.mouse.move(riverside.x + riverside.width / 2, riverside.y + riverside.height / 2, { steps: 16 }); await page.mouse.up();
+  await expect(page.locator('#selection')).toContainText('Больница'); await expect(page.locator('#selection')).toContainText('Заречье');
   const selected = await page.locator('#selection').textContent();
   const cdp = await context.newCDPSession(page);
   await cdp.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [{ x: 140, y: 350, id: 1 }, { x: 230, y: 400, id: 2 }] });
