@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import type { District } from '../sim/types';
 import { D } from '../sim/config';
 
 /** Ground-plane picking avoids raycasting buildings and keeps taps cheap. */
@@ -20,6 +21,7 @@ export class MapCamera {
   private point = new THREE.Vector3();
   private pointers = new Map<number, { x: number; y: number }>();
   private drag: { x: number; y: number; moved: boolean; multi: boolean; stop: number | null } | null = null;
+  districts: Pick<District, 'id' | 'x' | 'y'>[] = D.districts;
   building = false;
   onStop: (id: number) => void = () => {};
   constructor(private canvas: HTMLCanvasElement, private surface: HTMLElement = canvas) { this.bind(); }
@@ -48,7 +50,7 @@ export class MapCamera {
     this.ray.setFromCamera(this.pointer, this.camera);
     if (!this.ray.ray.intersectPlane(this.plane, this.point)) return null;
     let id: number | null = null, best = 0.65 / this.zoom;
-    for (const d of D.districts) { const distance = Math.hypot(d.x - this.point.x, d.y - this.point.z); if (distance < best) { id = d.id; best = distance; } }
+    for (const d of this.districts) { const distance = Math.hypot(d.x - this.point.x, d.y - this.point.z); if (distance < best) { id = d.id; best = distance; } }
     return id;
   }
   private pan(dx: number, dy: number) {
@@ -56,7 +58,7 @@ export class MapCamera {
     const vertical = dy * (this.camera.top - this.camera.bottom) / this.height / Math.sin(this.tilt);
     this.target.x -= horizontal * Math.cos(this.angle) + vertical * Math.sin(this.angle);
     this.target.z += horizontal * Math.sin(this.angle) - vertical * Math.cos(this.angle);
-    this.target.x = THREE.MathUtils.clamp(this.target.x, -1, 12); this.target.z = THREE.MathUtils.clamp(this.target.z, -1, 12);
+    this.target.x = THREE.MathUtils.clamp(this.target.x, -3, 16); this.target.z = THREE.MathUtils.clamp(this.target.z, -3, 16);
   }
   private bind() {
     this.surface.addEventListener('pointerdown', e => {

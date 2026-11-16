@@ -17,9 +17,10 @@ export class Atmosphere {
   constructor(private scene: THREE.Scene, private windows: THREE.MeshBasicMaterial) {
     this.sun.position.set(-8, 17, 9); scene.add(this.ambient, this.sun); scene.background = this.sky; scene.fog = this.fog;
   }
-  update(minute: number, mode: TimeOfDay) {
+  update(minute: number, mode: TimeOfDay, weather = '') {
     const value = daylight(minute, mode);
     this.sky.copy(this.night).lerp(this.day, value); this.fog.color.copy(this.sky);
+    if(weather==='rain'||weather==='snow'){this.sky.lerp(this.night,weather==='rain'?.35:.15);this.fog.color.copy(this.sky);}
     this.ambient.intensity = 0.7 + value * 1.5; this.sun.intensity = 0.2 + value * 2.2;
     this.sun.color.set(value > 0.65 ? '#fff0cf' : value > 0.1 ? '#ffc09a' : '#9bb8f3');
     this.windows.color.set(value > 0.5 ? '#658b95' : '#ffdb89');

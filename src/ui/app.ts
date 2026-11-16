@@ -2,6 +2,7 @@ import { t, number } from '../core/i18n';
 import type { Settings } from '../core/settings';
 import { E } from '../sim/config';
 import { constructionCost } from '../sim/commands';
+import { cityReport } from './city';
 import { routesPanel, fleetPanel, financePanel } from './panels';
 import type { Command, Mode, World } from '../sim/types';
 export class GameUI {
@@ -34,7 +35,7 @@ export class GameUI {
       <div class="map-tools"><select id="layer" aria-label="${t('layerLabel')}">${['off','demand','load','complaints'].map(key=>`<option value="${key}">${t(key)}</option>`).join('')}</select><button id="debug-toggle" aria-label="${t('debug')}">FPS</button></div><output id="layer-legend" hidden></output>
       <button id="event-banner"></button><div id="crisis" hidden></div>
       <div class="zoom"><div class="rotate-tools"><button id="rotate-left" aria-label="${t('rotateLeft')}">↶</button><button id="rotate-right" aria-label="${t('rotateRight')}">↷</button></div><button id="zoom-in" aria-label="${t('zoomIn')}">+</button><button id="zoom-out" aria-label="${t('zoomOut')}">−</button><button id="recenter" aria-label="${t('recenter')}">⌖</button></div><output id="debug" hidden></output>
-      <div class="map-bottom"><span id="growth"></span><div class="speed">${[0,1,2].map(n=>`<button data-speed="${n}" class="${n===1?'active':''}" aria-label="${n===0?t('pause'):t('speed')+' '+n}">${n===0?'Ⅱ':n+'×'}</button>`).join('')}</div></div>
+      <div class="map-bottom"><button id="growth" aria-label="${t('cityReport')}"></button><div class="speed">${[0,1,2].map(n=>`<button data-speed="${n}" class="${n===1?'active':''}" aria-label="${n===0?t('pause'):t('speed')+' '+n}">${n===0?'Ⅱ':n+'×'}</button>`).join('')}</div></div>
       <aside hidden><div class="panel-top"><b id="panel-title"></b><button id="panel-close" aria-label="${t('close')}">×</button></div><div id="panel"></div></aside>
       <div id="build-bar" hidden><b id="build-hint"></b><small>${t('draftHint')}</small><div id="selection"></div><div class="draft-tools"><select id="draft-end"><option value="end">${t('appendEnd')}</option><option value="start">${t('appendStart')}</option></select><button id="undo">↶</button><button id="clear-draft">${t('clearDraft')}</button></div><div class="build-actions"><button id="cancel">${t('cancel')}</button><button id="confirm" class="primary"></button></div></div>
       <nav>${['map','routes','fleet','finance'].map(key=>`<button data-tab="${key}" class="${key==='map'?'active':''}">${t(key)}</button>`).join('')}</nav>
@@ -42,6 +43,7 @@ export class GameUI {
     this.mapHost=document.querySelector('#map')!;this.modal=document.querySelector('#modal')!;
     const click=(id:string,fn:()=>void)=>{document.getElementById(id)!.onclick=fn;};
     click('settings',()=>this.showSettings());
+    click('growth',()=>this.showDialog(cityReport(this.world)));
     click('rotate-left',()=>this.onRotate(-Math.PI/6));click('rotate-right',()=>this.onRotate(Math.PI/6));
     this.modal.addEventListener('change',e=>{
       const target=e.target as HTMLElement;if(!target.closest('#settings-form'))return;
@@ -65,7 +67,7 @@ export class GameUI {
     click('event-banner',()=>{const id=this.world.event?.id??this.world.nextEvent.id;this.showDialog(`<h2>${t(id)}</h2><p>${t(id+'Text')}</p>`);});
     document.querySelector<HTMLSelectElement>('#layer')!.onchange=e=>{
       const layer=(e.target as HTMLSelectElement).value;this.onLayer(layer);
-      const legend=document.getElementById('layer-legend')!;legend.hidden=layer==='off';legend.textContent=t('layer'+layer[0].toUpperCase()+layer.slice(1));
+      const legend=document.getElementById('layer-legend')!;legend.hidden=layer==='off';legend.textContent=t('layer'+layer[0].toUpperCase()+layer.slice(1));legend.dataset.layer=layer;
     };
     document.querySelectorAll<HTMLButtonElement>('[data-tab]').forEach(b=>b.onclick=()=>this.openPanel(b.dataset.tab!));
     document.querySelectorAll<HTMLButtonElement>('[data-speed]').forEach(button=>button.onclick=()=>{this.onSpeed(Number(button.dataset.speed));document.querySelectorAll('[data-speed]').forEach(b=>b.classList.toggle('active',b===button));});

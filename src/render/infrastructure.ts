@@ -1,0 +1,63 @@
+import * as THREE from 'three';
+import { CityGeometry } from './geometry';
+import { roadSegments } from '../sim/roads';
+
+export const landmarks = [[0,10],[6,3],[6,0],[0,0],[3,3],[12,8.6],[3,12]];
+export const isLandmark = (x: number, z: number) => landmarks.some(p => Math.hypot(x - p[0], z - p[1]) < 0.8);
+export function roadClearance(x: number, z: number) {
+  let distance = Infinity;
+  for (const path of roadSegments) for (let i = 1; i < path.length; i++) {
+    const [ax, az] = path[i - 1], [bx, bz] = path[i], dx = bx - ax, dz = bz - az;
+    const t = Math.max(0, Math.min(1, ((x - ax) * dx + (z - az) * dz) / (dx * dx + dz * dz)));
+    distance = Math.min(distance, Math.hypot(x - ax - t * dx, z - az - t * dz));
+  }
+  return distance;
+}
+export function infrastructure(scene: THREE.Scene) {
+  const g = new CityGeometry();
+  const box = (c: string, x: number, y: number, z: number, sx: number, sy: number, sz: number, r = 0) => g.add('box', c, x, y, z, sx, sy, sz, r);
+  for (const path of roadSegments) for (let i = 1; i < path.length; i++) {
+    const [ax, az] = path[i - 1], [bx, bz] = path[i], length = Math.hypot(bx - ax, bz - az), angle = Math.atan2(bx - ax, bz - az);
+    box('#d9cfb9', (ax+bx)/2, .06, (az+bz)/2, .67, .07, length+.08, angle);
+    box('#59666a', (ax+bx)/2, .106, (az+bz)/2, .43, .024, length+.04, angle);
+    for (let t = .15; t < length; t += .45) box('#dfd8b8', ax+(bx-ax)*t/length, .124, az+(bz-az)*t/length, .022, .005, .18, angle);
+  }
+  // Railway station, canopy, platform, rails and a stationary passenger train.
+  box('#e1b77e', 0,.44,10, 1.1,.78,.64); g.add('roof','#865c4e',0,.96,10,1.25,.3,.83);
+  box('#f6e4b8',0,.76,9.66,.36,.5,.06); g.add('cylinder','#fff5d5',0,.84,9.61,.23,.04,.23,Math.PI/2);
+  box('#516b77',-.06,.49,10.65,1.7,.09,.63);
+  for (const x of [-.7,.65]) box('#7c827c',x,.27,10.65,.055,.48,.06);
+  for (const z of [11.3,11.6]) box('#7e827c',5.5,.13,z,14,.05,.035);
+  for (let x=-1; x<13; x+=.35) box('#92836e',x,.08,11.45,.13,.06,.5);
+  for (let i=0;i<3;i++) { box('#4d858e',.2+i*.75,.32,11.45,.68,.32,.27);box('#b3d7d8',.2+i*.75,.39,11.45,.49,.1,.29); }
+  // Hospital wings and red cross, university columns and pediment.
+  box('#e6e4d6',6,.6,3,.86,1.08,.62);box('#b5c9c4',6,.3,3,.4,.5,1.15);
+  box('#cc5650',6,.91,3.32,.3,.08,.035);box('#cc5650',6,.91,3.33,.08,.3,.035);
+  box('#e7d6ae',6,.44,0,1.15,.78,.68);g.add('roof','#a35f4c',6,.99,0,1.28,.35,.84);
+  for (let i=0;i<5;i++) g.add('cylinder','#f8e9c7',5.55+i*.22,.46,.43,.08,.75,.08);
+  // Workshops, sawtooth roofs and chimneys.
+  box('#ad9b87',0,.28,0,1.35,.48,.8);
+  for(let i=0;i<3;i++)g.add('roof','#697c7b',-.43+i*.43,.64,0,.45,.3,.87);
+  for (const x of [-.5,.5]) { g.add('cylinder','#ad7356',x,.83,-.42,.14,1.5,.14);g.add('cylinder','#ddd0b7',x,1.25,-.42,.16,.12,.16); }
+  // Market tents, depot and taxi rank near the station.
+  for(let i=0;i<4;i++){box('#d0b188',2.55+(i%2)*.75,.2,2.65+Math.floor(i/2)*.65,.55,.27,.4);g.add('roof',i%2?'#c85f49':'#e8d59c',2.55+(i%2)*.75,.48,2.65+Math.floor(i/2)*.65,.65,.24,.53);}
+  box('#a9b6ae',3,.3,12,1.8,.5,.62);box('#5d7074',3,.59,12,1.9,.08,.75);
+  for(let i=0;i<4;i++)box('#405966',2.38+i*.42,.25,12.32,.31,.33,.025);
+  box('#d7b348',.6,.09,9.2,1.1,.02,.35);
+  // Football ground with stands, floodlight towers and goals.
+  box('#3e9368',12,.07,8.6,1.7,.04,2.2);
+  for(const x of [11.17,12.83])box('#eee5c8',x,.1,8.6,.025,.01,2.15);
+  for(const z of [7.55,8.6,9.65])box('#eee5c8',12,.1,z,1.68,.01,.025);
+  for(const x of [10.95,13.05]) for(let i=0;i<3;i++)box(i%2?'#c3b48f':'#8eaaa4',x+(x<12?-i:i)*.1,.12+i*.1,8.6,.15,.16,2.1);
+  for(const z of [7.6,9.6]){box('#eeeece',12,.26,z,.54,.04,.03);for(const x of [11.75,12.25])box('#eeeece',x,.18,z,.035,.23,.035);}
+  for(const x of [11,13])for(const z of [7.3,9.9]){box('#6a7e7d',x,.8,z,.04,1.5,.04);box('#fff0b7',x,1.56,z,.25,.13,.09);}
+  // Bridge abutments, railings and a roundabout at the outer interchange.
+  for(const z of [1,4,7,10])for(const x of [8,9]){box('#87918b',x,-.12,z,.12,.45,.56);box('#b5c5bc',8.5,.25,z+.26,1.3,.14,.035);}
+  g.add('cylinder','#718275',13,.13,4,.7,.1,.7);g.add('cylinder','#95a879',13,.19,4,.4,.07,.4);
+  // Bus shelters: recognisable platforms, seats, roof and glass side panels.
+  for(const p of [[1,10],[1,7],[4,7],[4,4],[1,1],[7,1],[7,4],[10,4],[10,1],[10,7],[7,10],[4,10]]){
+    const [x,z]=p;box('#bbc9be',x+.35,.12,z,.25,.06,.6);box('#56766d',x+.4,.49,z,.27,.05,.62);
+    box('#84b5bb',x+.5,.31,z,.035,.34,.55);box('#ad7952',x+.36,.24,z,.1,.045,.4);
+  }
+  scene.add(g.finish());
+}
