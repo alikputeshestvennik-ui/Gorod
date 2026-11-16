@@ -4,7 +4,9 @@ test('телефон: маршрут, резерв, офлайн и сохран
   page.on('pageerror',e=>errors.push(e.message));page.on('request',r=>{if(!r.url().startsWith('http://127.0.0.1:4173'))external.push(r.url());});
   await page.goto('/');await expect(page.locator('#population')).toHaveText('5 000');
   await page.getByRole('button',{name:'Пауза',exact:true}).click();
-  await page.locator('#debug-toggle').click();await page.waitForTimeout(1800);console.log('GRAPHICS',await page.locator('#debug').textContent());
+  await page.locator('#debug-toggle').click();
+  await expect(page.locator('#debug')).toHaveText(/^[1-9]\d* FPS · \d+ calls · \d+ triangles$/);
+  console.log('GRAPHICS',await page.locator('#debug').textContent());
   await page.screenshot({path:'artifacts/portrait.png',fullPage:true});
   await page.getByRole('button',{name:'Создать маршрут',exact:false}).click();
   await page.getByRole('button',{name:'Больница',exact:true}).click();await page.getByRole('button',{name:'Заречье',exact:true}).click();

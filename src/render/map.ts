@@ -29,7 +29,7 @@ export class CityMap {
   private height = 1;
   private frames = 0;
   private fps = 0;
-  private lastCounter = 0;
+  private lastCounter = performance.now() / 1000;
   onStop: (id: number) => void = () => {};
   building = false;
   layer: Layer = 'off';
@@ -159,7 +159,8 @@ export class CityMap {
     this.cars.count=car;this.cars.instanceMatrix.needsUpdate=true;
     for(const d of world.districts){this.projected.set(d.x,0.2,d.y).project(this.camera);const label=this.labels[d.id];label.style.left=`${(this.projected.x+1)*this.width/2}px`;label.style.top=`${(-this.projected.y+1)*this.height/2}px`;label.hidden=Math.abs(this.projected.x)>1||Math.abs(this.projected.y)>1;}
     this.renderer.render(this.scene,this.camera);this.frames++;
-    if(time-this.lastCounter>=1){this.fps=Math.round(this.frames/(time-this.lastCounter));this.frames=0;this.lastCounter=time;}
+    const wallTime = performance.now() / 1000;
+    if(wallTime-this.lastCounter>=1){this.fps=Math.round(this.frames/(wallTime-this.lastCounter));this.frames=0;this.lastCounter=wallTime;}
   }
   stats(){return `${this.fps} FPS · ${this.renderer.info.render.calls} calls · ${this.renderer.info.render.triangles} triangles`;}
 }
