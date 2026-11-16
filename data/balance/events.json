@@ -53,5 +53,27 @@
     "district": -1,
     "minPopulation": 0,
     "maxTrust": 25
+  },
+  {
+    "id": "rain",
+    "duration": 120,
+    "demand": 1.15,
+    "speed": 0.75,
+    "breakdowns": 1.4,
+    "trust": 0,
+    "district": -1,
+    "minPopulation": 0,
+    "maxTrust": 100
+  },
+  {
+    "id": "match",
+    "duration": 150,
+    "demand": 3.8,
+    "speed": 0.85,
+    "breakdowns": 1,
+    "trust": 1,
+    "district": 9,
+    "minPopulation": 0,
+    "maxTrust": 100
   }
 ]

@@ -1,3 +1,4 @@
+import { develop } from './development';
 import { E } from './config';
 import { routeTravel } from './demand';
 import type { World } from './types';
@@ -9,15 +10,21 @@ export function accessibility(world: World, origin: number): number {
 export function growthRate(access: number, satisfaction: number): number {
   return E.growthBase * (1 + access * E.satisfactionGrowthBonus * satisfaction / 100);
 }
-export function grow(world: World): void {
+export function grow(world: World, daily = false): void {
+  const period = daily ? E.daysPerMonth : 1;
+  if (!daily || world.minute % (E.minutesPerDay * E.daysPerMonth) === 0) world.lastGrowth = 0;
   let added = 0;
   for (const d of world.districts) {
+    const lot = world.development[d.id];
     d.accessibility = accessibility(world, d.id);
-    d.landValue += E.landValueRate * (d.accessibility - d.landValue);
-    d.density += E.densityRate * Math.max(0, d.landValue - d.density);
-    // Housing expands at the edge of each district: no global population cap.
-    const growth = Math.floor(d.population * Math.min(E.housingExpansion, growthRate(d.accessibility, world.satisfaction)));
+    d.landValue += E.landValueRate / period * (d.accessibility - d.landValue);
+    d.density += E.densityRate / period * Math.max(0, d.landValue - d.density);
+    lot.capacity += d.population * E.housingExpansion / period;
+    const expected = d.population * Math.min(E.housingExpansion, growthRate(d.accessibility, world.satisfaction)) / period + lot.growthRemainder;
+    const growth = Math.max(0, Math.min(lot.capacity - d.population, Math.floor(expected)));
+    lot.growthRemainder = expected - Math.floor(expected);
     d.population += growth; added += growth;
   }
-  world.lastGrowth = added;
+  added += develop(world);
+  world.lastGrowth += added;
 }

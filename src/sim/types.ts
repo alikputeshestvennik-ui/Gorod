@@ -7,7 +7,9 @@ export interface District {
 export interface Route { id: number; mode: Mode; stops: number[]; vehicles: number; served: number; }
 export interface Ledger { tickets: number; advertising: number; subsidy: number; rent: number; wages: number; energy: number; maintenance: number; depreciation: number; interest: number; construction: number; purchases: number; }
 export interface World {
-  version: 2; seed: number; minute: number; remainder: number; money: number;
+  version: 3;
+  development: Development[]; expansion: { index: number; since: number; until: number } | null;
+  mobility: { transit: number; taxi: number; car: number; walk: number }; seed: number; minute: number; remainder: number; money: number;
   satisfaction: number; trust: number; ecology: number; districts: District[]; routes: Route[];
   fleet: number; fleets: Record<Mode, number>; wear: Record<Mode, number>;
   fare: number; nextRoute: number; served: number; missed: number;
@@ -22,3 +24,5 @@ export type Command = { type: 'buildRoute'; stops: number[]; mode?: Mode } |
   { type: 'serviceFleet'; mode: Mode } | { type: 'takeLoan' } | { type: 'repayLoan' } |
   { type: 'removeRoute'; routeId: number };
 export type Result = { ok: true } | { ok: false; error: string };
+
+export interface Development { phase: 'occupied' | 'construction' | 'renovation' | 'abandoned' | 'park'; since: number; until: number; level: number; badDays: number; capacity: number; growthRemainder: number; }

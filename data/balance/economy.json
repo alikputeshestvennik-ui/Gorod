@@ -62,5 +62,9 @@
   "strikeCostMultiplier": 1.5,
   "lowTrustSubsidy": 0.5,
   "eventGapMinutes": 360,
-  "firstEventMinute": 240
+  "firstEventMinute": 240,
+  "taxiMinutesPerUnit": 2.2,
+  "taxiBaseFare": 55,
+  "taxiFarePerUnit": 9,
+  "taxiWaitMinutes": 3
 }

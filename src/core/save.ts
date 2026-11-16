@@ -1,5 +1,6 @@
 import { E, D, MODES, EVENTS } from '../sim/config';
 import { createWorld } from '../sim/world';
+import { C, initialDevelopment, initialExpansion } from '../sim/development';
 import type { World } from '../sim/types';
 export const LEGACY_KEY = 'gorodskoy-marshrut:stage1:v1';
 export const SAVE_KEY = 'gorodskoy-marshrut:stage2:v2';
@@ -7,7 +8,7 @@ const finite = (n: unknown): n is number => typeof n === 'number' && Number.isFi
 export function restore(raw: string): World | null {
   try {
     const parsed = JSON.parse(raw);
-    if (!parsed || ![1,2].includes(parsed.version)) return null;
+    if (!parsed || ![1,2,3].includes(parsed.version)) return null;
     const base = createWorld();
     if(parsed.version===1){
       parsed.version=2;parsed.ecology=base.ecology;parsed.debt=0;parsed.gameOver=false;
@@ -17,11 +18,23 @@ export function restore(raw: string): World | null {
       parsed.routes=parsed.routes.map((r:object)=>({...r,mode:'marshrutka'}));
       parsed.event=null;parsed.nextEvent={id:base.nextEvent.id,at:parsed.minute+E.firstEventMinute};
     }
+    if (parsed.version === 2) {
+      if (!Array.isArray(parsed.districts)) return null;
+      parsed.development = parsed.districts.map((d: { population: number }) => initialDevelopment(d.population, parsed.minute));
+      parsed.expansion = initialExpansion(parsed.minute); parsed.mobility = base.mobility; parsed.version = 3;
+    }
     const w=parsed as World;
     for (const [key, val] of Object.entries(base)) if (typeof val === 'number' && !finite(w[key as keyof World])) return null;
     if (!Number.isInteger(w.seed) || w.seed < 0 || w.seed > 0xffffffff || !Number.isInteger(w.minute) || w.minute < 0 || w.minute % E.minutesPerTick || w.remainder < 0 || w.remainder >= E.minutesPerTick || w.fare < E.fareMin || w.fare > E.fareMax || w.satisfaction < 0 || w.satisfaction > 100 || w.trust < 0 || w.trust > 100) return null;
-    if (!Number.isInteger(w.fleet) || w.fleet < 0 || w.fleet > E.maxVehicles || !Array.isArray(w.routes) || w.routes.length > E.maxRoutes || !Array.isArray(w.districts) || w.districts.length !== D.districts.length) return null;
-    if (w.districts.some((d, i) => !d || d.id !== i || d.name !== D.districts[i].name || d.type !== D.districts[i].type || Object.entries(D.districts[i]).some(([k,v]) => typeof v === 'number' && (!finite(d[k as keyof typeof d]) || Number(d[k as keyof typeof d]) < 0)) || d.x !== D.districts[i].x || d.y !== D.districts[i].y)) return null;
+    if (!Number.isInteger(w.fleet) || w.fleet < 0 || w.fleet > E.maxVehicles || !Array.isArray(w.routes) || w.routes.length > E.maxRoutes || !Array.isArray(w.districts) || (w.districts.length < D.districts.length || w.districts.length > D.districts.length + C.quarters.length)) return null;
+    if (w.districts.some((d, i) => {
+      const quarter = C.quarters[i - D.districts.length];
+      const template = D.districts[i] ?? (quarter ? { ...D.districts[1], name: quarter.name, x: C.nodes[quarter.node][0], y: C.nodes[quarter.node][1] } : null);
+      return !d || !template || d.id !== i || d.name !== template.name || d.type !== template.type || Object.entries(template).some(([k,v]) => typeof v === 'number' && (!finite(d[k as keyof typeof d]) || Number(d[k as keyof typeof d]) < 0)) || d.x !== template.x || d.y !== template.y;
+    })) return null;
+    if (!Array.isArray(w.development) || w.development.length !== w.districts.length || w.development.some(lot => !lot || !['occupied','construction','renovation','abandoned','park'].includes(lot.phase) || ['since','until','level','badDays','capacity','growthRemainder'].some(k => !finite(lot[k as keyof typeof lot]) || Number(lot[k as keyof typeof lot]) < 0) || lot.since > w.minute || !Number.isInteger(lot.level) || lot.level > C.maxTowerLevel + 100 || lot.growthRemainder >= 1)) return null;
+    if (w.expansion !== null && (!w.expansion || w.expansion.index !== w.districts.length - D.districts.length || !C.quarters[w.expansion.index] || !finite(w.expansion.since) || w.expansion.since < 0 || w.expansion.since > w.minute || !finite(w.expansion.until) || w.expansion.until <= w.minute)) return null;
+    if (!w.mobility || ['transit','taxi','car','walk'].some(k => !finite(w.mobility[k as keyof typeof w.mobility]) || w.mobility[k as keyof typeof w.mobility] < 0)) return null;
     if (!w.fleets || !w.wear || !w.ledger || MODES.some(mode=>!Number.isInteger(w.fleets[mode]) || w.fleets[mode]<0 || !finite(w.wear[mode]) || w.wear[mode]<0 || w.wear[mode]>100) || MODES.reduce((s,m)=>s+w.fleets[m],0)!==w.fleet) return null;
     if(Object.keys(w.ledger).length!==Object.keys(base.ledger).length || Object.keys(base.ledger).some(k=>!finite(w.ledger[k as keyof typeof w.ledger]) || w.ledger[k as keyof typeof w.ledger]<0))return null;
     if(w.ecology<0 || w.ecology>100 || w.debt<0 || w.debt>E.loanMax || typeof w.gameOver!=='boolean')return null;

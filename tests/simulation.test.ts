@@ -9,7 +9,7 @@ import { load, restore, save, SAVE_KEY } from '../src/core/save';
 describe('спрос, транспорт и рост',()=>{
   it('нормализует выбор и снижает долю транспорта при дорогом билете',()=>{
     const cheap=modeShares(20,15,4,8),expensive=modeShares(20,65,4,8);
-    expect(cheap.transit+cheap.car+cheap.walk).toBeCloseTo(1,12);expect(cheap.transit).toBeGreaterThan(expensive.transit);
+    expect(cheap.transit+cheap.car+cheap.walk+cheap.taxi).toBeCloseTo(1,12);expect(cheap.transit).toBeGreaterThan(expensive.transit);
     const unavailable=modeShares(Infinity,35,10,8);expect(unavailable.transit).toBe(0);
     expect(modeShares(20,35,4,8,2).transit).toBeLessThan(modeShares(20,35,4,8,0).transit);
   });

@@ -1,3 +1,4 @@
+import { roadDistance } from './roads';
 import { E, D, T } from './config';
 import type { District, Route, World } from './types';
 export const distance = (a: District, b: District) => Math.abs(a.x - b.x) + Math.abs(a.y - b.y);
@@ -16,13 +17,14 @@ export function modeShares(transitTime: number, fare: number, wait: number, dist
   const transit = -E.alpha * transitTime - E.beta * fare - E.epsilon * wait - E.gamma * discomfort;
   const car = -E.alpha * dist * E.carMinutesPerUnit * (1 + congestion) - E.beta * E.carFare;
   const walk = -E.alpha * dist * E.walkMinutesPerUnit;
-  const max = Math.max(transit, car, walk);
-  const values = [transit, car, walk].map(u => Math.exp(u - max));
-  const sum = values.reduce((a, b) => a + b, 0);
-  return { transit: values[0] / sum, car: values[1] / sum, walk: values[2] / sum };
+  const taxi = -E.alpha * (dist * E.taxiMinutesPerUnit * (1 + congestion) + E.taxiWaitMinutes) - E.beta * (E.taxiBaseFare + dist * E.taxiFarePerUnit);
+  const max = Math.max(transit, car, walk, taxi);
+  const t = Math.exp(transit - max), c = Math.exp(car - max), w = Math.exp(walk - max), x = Math.exp(taxi - max);
+  const sum = t + c + w + x;
+  return { transit: t / sum, car: c / sum, walk: w / sum, taxi: x / sum };
 }
 export function routeLength(world: World, route: Route): number {
-  return route.stops.slice(1).reduce((sum, id, i) => sum + distance(world.districts[route.stops[i]], world.districts[id]), 0);
+  return route.stops.slice(1).reduce((sum, id, i) => sum + roadDistance(world.districts[route.stops[i]], world.districts[id]), 0);
 }
 export function routeTravel(world: World, route: Route, from: number, to: number): number {
   const a = route.stops.indexOf(from), b = route.stops.indexOf(to);
