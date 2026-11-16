@@ -67,10 +67,10 @@ describe('сохранения',()=>{
   });
   it('отвергает повреждения и незнакомую версию',()=>{
     expect(restore('{')).toBeNull();expect(restore('null')).toBeNull();
-    for(const modify of [(w:any)=>w.version=2,(w:any)=>w.queues[0][0]=-1,(w:any)=>w.routes[0].vehicles=100,(w:any)=>delete w.districts[0].population,(w:any)=>w.routes[0].stops=[0,0],(w:any)=>w.nextRoute=1]){const w=createWorld();modify(w);expect(restore(JSON.stringify(w))).toBeNull();}
+    for(const modify of [(w:any)=>w.version=99,(w:any)=>w.queues[0][0]=-1,(w:any)=>w.routes[0].vehicles=100,(w:any)=>delete w.districts[0].population,(w:any)=>w.routes[0].stops=[0,0],(w:any)=>w.nextRoute=1]){const w=createWorld();modify(w);expect(restore(JSON.stringify(w))).toBeNull();}
   });
   it('обрабатывает запрет хранилища и изолирует старый прототип',()=>{
-    expect(SAVE_KEY).toContain('stage1');expect(save(createWorld(),{setItem(){throw Error();}})).toBe(false);
+    expect(SAVE_KEY).toContain('stage2');expect(save(createWorld(),{setItem(){throw Error();}})).toBe(false);
     expect(load({getItem(){throw Error();}}).warning).toBe('saveBlocked');
     expect(load({getItem(){return '{}';}}).warning).toBe('saveInvalid');
   });

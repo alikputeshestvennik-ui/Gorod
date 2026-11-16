@@ -1,4 +1,4 @@
-import { E, D, M } from './config';
+import { E, D, T } from './config';
 import type { District, Route, World } from './types';
 export const distance = (a: District, b: District) => Math.abs(a.x - b.x) + Math.abs(a.y - b.y);
 export function demand(a: District, b: District, minute: number): number {
@@ -28,8 +28,8 @@ export function routeTravel(world: World, route: Route, from: number, to: number
   const a = route.stops.indexOf(from), b = route.stops.indexOf(to);
   if (a < 0 || b < 0) return Infinity;
   const ids = route.stops.slice(Math.min(a, b), Math.max(a, b) + 1);
-  return routeLength(world, { ...route, stops: ids }) * M.minutesPerUnit;
+  return routeLength(world, { ...route, stops: ids }) * T[route.mode].minutesPerUnit;
 }
 export function headway(world: World, route: Route): number {
-  return (routeLength(world, route) * M.minutesPerUnit * 2 + M.turnaroundMinutes) / Math.max(1, route.vehicles);
+  return (routeLength(world, route) * T[route.mode].minutesPerUnit * 2 + T[route.mode].turnaroundMinutes) / Math.max(1, route.vehicles);
 }
