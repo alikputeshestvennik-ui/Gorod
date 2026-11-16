@@ -7,7 +7,7 @@ test('карта на весь экран, редактор, автопарк, �
   await page.getByRole('button',{name:'Пауза',exact:true}).click();
   await expect(page.locator('aside')).toBeHidden();
   const fullMap=async()=>expect(await page.locator('#map').evaluate(el=>{const b=el.getBoundingClientRect();return b.x===0&&b.y===0&&b.width===innerWidth&&b.height===innerHeight&&document.documentElement.scrollHeight===innerHeight;})).toBe(true);
-  await fullMap();await page.locator('#debug-toggle').click();
+  await fullMap();expect(await page.locator('.stats strong').evaluateAll(nodes=>nodes.every(el=>el.scrollWidth<=el.clientWidth))).toBe(true);await page.locator('#debug-toggle').click();
   await expect(page.locator('#debug')).toHaveText(/^[1-9]\d* FPS · \d+ calls · \d+ triangles$/);
   console.log('GRAPHICS_PORTRAIT',await page.locator('#debug').textContent());
   await page.locator('#layer').selectOption('demand');await expect(page.locator('#layer-legend')).toBeVisible();
