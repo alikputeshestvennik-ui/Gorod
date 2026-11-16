@@ -1,0 +1,66 @@
+name: Unzip Archive to Repository
+
+on:
+  push:
+    paths:
+      - '**.zip' # Запуск при добавлении или изменении любого ZIP-файла
+  workflow_dispatch: # Возможность запустить вручную из вкладки Actions
+
+jobs:
+  unzip-and-commit:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # Разрешение на запись (коммит) в репозиторий
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Find and extract ZIP
+        id: unzip_step
+        run: |
+          # Ищем первый ZIP-файл в корне репозитория
+          ZIP_FILE=$(find . -maxdepth 1 -name "*.zip" | head -n 1)
+          if [ -z "$ZIP_FILE" ]; then
+            echo "ZIP file not found. Skipping."
+            exit 0
+          fi
+          echo "Found: $ZIP_FILE"
+
+          # Создаем временную папку и распаковываем туда архив
+          mkdir -p /tmp/extracted
+          unzip -q "$ZIP_FILE" -d /tmp/extracted
+
+          # Если внутри архива одна корневая папка, "поднимаем" её содержимое на уровень выше
+          # Это помогает избежать появления лишней вложенной директории
+          CONTENTS=$(ls -A /tmp/extracted | wc -l)
+          if [ "$CONTENTS" -eq 1 ]; then
+            SINGLE_ITEM=$(ls -A /tmp/extracted)
+            if [ -d "/tmp/extracted/$SINGLE_ITEM" ]; then
+              mv /tmp/extracted/"$SINGLE_ITEM"/* /tmp/extracted/ 2>/dev/null || true
+              mv /tmp/extracted/"$SINGLE_ITEM"/.[!.]* /tmp/extracted/ 2>/dev/null || true
+              rmdir /tmp/extracted/"$SINGLE_ITEM" 2>/dev/null || true
+            fi
+          fi
+
+          # Копируем распакованные файлы в рабочую директорию репозитория
+          cp -a /tmp/extracted/. .
+
+          # Удаляем исходный ZIP-файл, чтобы он не попал в коммит
+          rm -f "$ZIP_FILE"
+          echo "Extraction completed."
+
+      - name: Commit and push changes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add -A
+          # Если изменений нет, просто выходим
+          if git diff --cached --quiet; then
+            echo "No changes to commit."
+            exit 0
+          fi
+          git commit -m "chore: auto-unzip archive and update files"
+          git push origin ${{ github.ref_name }}
