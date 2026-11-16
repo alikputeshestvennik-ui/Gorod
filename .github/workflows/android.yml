@@ -1,0 +1,59 @@
+name: Android APK
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      # Capacitor 7 requires JDK 21; node_modules/@capacitor/android/capacitor/build.gradle sets JavaVersion.VERSION_21.
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+      - uses: android-actions/setup-android@v3
+      - run: npm ci
+      - run: npm test
+      - run: python -m unittest discover -s tests -v
+      - run: npm run build
+      - name: Install browser for mobile smoke checks
+        run: npx playwright install --with-deps chromium
+      - name: Check portrait, landscape, offline play and saves
+        run: npx playwright test
+      - name: Upload interface screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mobile-screenshots
+          path: artifacts/
+          if-no-files-found: ignore
+      - run: npx cap sync android
+      - name: Test, lint and build Android
+        working-directory: android
+        run: |
+          chmod +x gradlew
+          ./gradlew test lint assembleDebug
+      - name: Verify APK has no permissions
+        run: |
+          APK=android/app/build/outputs/apk/debug/app-debug.apk
+          "$ANDROID_HOME/cmdline-tools/latest/bin/apkanalyzer" manifest permissions "$APK" > apk-permissions.txt
+          cat apk-permissions.txt
+          if grep -q android.permission apk-permissions.txt; then exit 1; fi
+      - uses: actions/upload-artifact@v4
+        with:
+          name: gorodskoy-marshrut-apk
+          path: android/app/build/outputs/apk/debug/*.apk
+          if-no-files-found: error
+      - uses: actions/upload-artifact@v4
+        with:
+          name: web-game
+          path: dist/

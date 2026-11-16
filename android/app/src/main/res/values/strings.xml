@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Городской маршрут</string>
+    <string name="title_activity_main">Городской маршрут</string>
+    <string name="package_name">ru.alim.gorodskoy</string>
+    <string name="custom_url_scheme">ru.alim.gorodskoy</string>
+</resources>
