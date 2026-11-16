@@ -10,16 +10,39 @@ function start(){
   const loaded=load(storage);let world=loaded.world,snapshot=getSnapshot(world);
   const ui=new GameUI(document.getElementById('app')!);
   const map=new CityMap(ui.mapHost);
+  let editing:number|undefined,prepend=false;
   let draft:number[]|null=null,speed=1,modal=false,accumulator=0,last=0,visualTime=0,saveElapsed=0,uiElapsed=0;
-  const refresh=()=>{snapshot=getSnapshot(world);ui.update(snapshot);map.update(snapshot,draft??[]);ui.build(draft);};
+  const refresh=()=>{snapshot=getSnapshot(world);ui.update(snapshot);map.update(snapshot,draft??[]);ui.build(draft,editing);};
   const persist=()=>{if(!save(world,storage))ui.toast('saveError');};
-  const cancel=()=>{draft=null;map.building=false;accumulator=0;refresh();};
-  ui.onCommand=cmd=>{const result=applyCommand(world,cmd);if(!result.ok){ui.toast(result.error);return;}ui.toast(cmd.type==='buyVehicle'?'bought':cmd.type==='assignVehicle'?'assigned':cmd.type==='removeRoute'?'removed':'newRoute');persist();refresh();};
-  ui.onBuild=()=>{draft=[];map.building=true;accumulator=0;refresh();};ui.onCancel=cancel;
-  ui.onConfirm=()=>{if(!draft)return;const result=applyCommand(world,{type:'buildRoute',stops:draft});if(!result.ok){ui.toast(result.error);return;}cancel();persist();ui.toast('newRoute');};
-  map.onStop=id=>{if(!draft){ui.onBuild();}if(draft&&!draft.includes(id)){draft.push(id);refresh();}};
+  const cancel=()=>{draft=null;editing=undefined;map.building=false;accumulator=0;refresh();};
+  ui.onCommand=cmd=>{
+    const result=applyCommand(world,cmd);if(!result.ok){ui.toast(result.error);return;}
+    const messages={buyVehicle:'bought',assignVehicle:'assigned',releaseVehicle:'released',removeRoute:'removed',setFare:'fareChanged',serviceFleet:'serviced',takeLoan:'loanChanged',repayLoan:'loanChanged',editRoute:'edited',buildRoute:'newRoute'};
+    ui.toast(messages[cmd.type]);persist();refresh();
+  };
+  const begin=(id?:number)=>{
+    if(world.gameOver){ui.toast('gameOver');return;}
+    editing=id;prepend=false;ui.resetDraftEnd();draft=id?[...world.routes.find(r=>r.id===id)!.stops]:[];
+    map.building=true;accumulator=0;ui.openPanel('map');refresh();
+  };
+  ui.onBuild=()=>begin();ui.onEdit=id=>begin(id);ui.onCancel=()=>{cancel();ui.openPanel('routes');};
+  ui.onConfirm=()=>{
+    if(!draft)return;
+    const result=applyCommand(world,editing?{type:'editRoute',routeId:editing,stops:draft}:{type:'buildRoute',stops:draft,mode:ui.mode});
+    if(!result.ok){ui.toast(result.error);return;}
+    const message=editing?'edited':'newRoute';cancel();persist();ui.openPanel('routes');ui.toast(message);
+  };
+  ui.onDraft=(action,index)=>{
+    if(!draft)return;
+    if(action==='start'||action==='end')prepend=action==='start';
+    if(action==='clear')draft=[];
+    if(action==='undo')prepend?draft.shift():draft.pop();
+    if(action==='remove'&&index!==undefined)draft.splice(index,1);
+    refresh();
+  };
+  map.onStop=id=>{if(!draft)begin();if(draft&&!draft.includes(id)){prepend?draft.unshift(id):draft.push(id);refresh();}};
   ui.onSpeed=value=>{speed=value;accumulator=0;};ui.onModal=value=>{modal=value;accumulator=0;};
-  ui.onReset=()=>{world=createWorld();draft=null;map.building=false;accumulator=0;persist();refresh();};
+  ui.onReset=()=>{world=createWorld();editing=undefined;draft=null;map.building=false;accumulator=0;persist();refresh();};
   ui.onZoom=factor=>map.changeZoom(factor);ui.onRecenter=()=>map.recenter();
   ui.onLayer=layer=>{map.layer=layer as Layer;map.update(snapshot,draft??[]);};
   document.addEventListener('keydown',e=>{if(e.key==='Escape'&&draft)cancel();});
@@ -28,7 +51,7 @@ function start(){
   const frame=(now:number)=>{
     const dt=last?Math.min((now-last)/1000,0.1):0;last=now;
     if(!document.hidden){
-      if(speed&&!modal&&draft===null){accumulator+=dt*speed;visualTime+=dt*speed;while(accumulator>=E.realSecondsPerTick){accumulator-=E.realSecondsPerTick;step(world,E.minutesPerTick);}}
+      if(speed&&!modal&&draft===null&&!world.gameOver){accumulator+=dt*speed;visualTime+=dt*speed;while(accumulator>=E.realSecondsPerTick){accumulator-=E.realSecondsPerTick;step(world,E.minutesPerTick);}}
       uiElapsed+=dt;saveElapsed+=dt;
       if(uiElapsed>=0.4){uiElapsed=0;refresh();ui.debug(map.stats());}
       if(saveElapsed>=10){saveElapsed=0;persist();}

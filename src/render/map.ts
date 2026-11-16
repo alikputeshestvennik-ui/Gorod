@@ -1,6 +1,7 @@
 import * as THREE from 'three';
-import { D, M } from '../sim/config';
+import { D, T } from '../sim/config';
 import type { World } from '../sim/types';
+import { eventConfig } from '../sim/events';
 import { t, number } from '../core/i18n';
 export type Layer = 'off' | 'demand' | 'load' | 'complaints';
 export class CityMap {
@@ -17,6 +18,9 @@ export class CityMap {
   private labels: HTMLButtonElement[] = [];
   private lines = new THREE.Group();
   private cars: THREE.InstancedMesh;
+  private heat: THREE.InstancedMesh;
+  private tint=new THREE.Color();
+  private scale=new THREE.Vector3();
   private paths: THREE.Vector3[][] = [];
   private lengths: number[] = [];
   private signature = '';
@@ -65,6 +69,8 @@ export class CityMap {
       label.onclick=()=>this.onStop(d.id); host.append(label); this.labels.push(label);
     }
     this.scene.add(this.lines);
+    this.heat=new THREE.InstancedMesh(new THREE.CircleGeometry(0.8,16),new THREE.MeshBasicMaterial({transparent:true,opacity:0.38,depthWrite:false}),D.districts.length);
+    this.heat.instanceMatrix.setUsage(THREE.DynamicDrawUsage);this.heat.visible=false;this.scene.add(this.heat);
     this.cars=new THREE.InstancedMesh(new THREE.BoxGeometry(0.17,0.12,0.32),flat('#223d36'),60);
     this.cars.count=0;this.cars.instanceMatrix.setUsage(THREE.DynamicDrawUsage);this.scene.add(this.cars);
     this.observer=new ResizeObserver(()=>this.resize()); this.observer.observe(host);
@@ -116,7 +122,7 @@ export class CityMap {
   }
   private pinchDistance(){const p=[...this.pointers.values()];return Math.hypot(p[0].x-p[1].x,p[0].y-p[1].y);}
   update(world:World,draft:number[]) {
-    const signature=JSON.stringify([world.routes.map(r=>[r.id,r.stops,r.vehicles]),draft]);
+    const signature=JSON.stringify([world.routes.map(r=>[r.id,r.stops,r.vehicles,r.mode]),draft,world.event?.id]);
     if(signature!==this.signature){
       this.signature=signature;
       for(const child of [...this.lines.children]){const line=child as THREE.Line;line.geometry.dispose();(line.material as THREE.Material).dispose();this.lines.remove(line);}
@@ -131,32 +137,43 @@ export class CityMap {
         if(i<world.routes.length){this.paths.push(points);this.lengths.push(points.reduce((s,p,k)=>k?s+p.distanceTo(points[k-1]):0,0));}
       }
     }
+    this.heat.visible=this.layer!=='off';
     for(const d of world.districts){
-      const waiting=world.queues[d.id].reduce((s,n)=>s+n,0);
-      const generated=world.demand[d.id];
-      const coverage=world.routes.filter(r=>r.stops.includes(d.id)).reduce((s,r)=>s+r.vehicles,0);
-      const intensity=this.layer==='demand'?Math.min(1,generated/15):this.layer==='load'?Math.min(1,waiting/Math.max(1,coverage*M.capacity)):this.layer==='complaints'?(coverage?0.2:0.9):0;
-      (this.stops[d.id].material as THREE.MeshBasicMaterial).color.set(draft.includes(d.id)?'#e28e42':intensity>0.5?'#d78050':'#31896b');
-      this.stops[d.id].scale.setScalar(draft.includes(d.id)?1.6:1+intensity);
-      this.labels[d.id].textContent=this.layer==='off'?t(d.name):t('stopLabel',{name:t(d.name),count:number(generated)});
+      const waiting=world.queues[d.id].reduce((s,n)=>s+n,0),generated=world.demand[d.id];
+      const event=eventConfig(world);
+      const capacity=world.routes.filter(r=>r.stops.includes(d.id)&&!(event?.id==='repair'&&r.stops.includes(event.district))).reduce((s,r)=>s+r.vehicles*T[r.mode].capacity,0);
+      const load=waiting/Math.max(1,capacity);
+      const complaint=capacity?Math.min(1,load):1;
+      const intensity=this.layer==='demand'?Math.min(1,generated/15):this.layer==='load'?Math.min(1,load):this.layer==='complaints'?complaint:0;
+      this.tint.setRGB(0.2+intensity*0.65,0.65-intensity*0.3,0.35-intensity*0.12);
+      this.matrix.makeRotationX(-Math.PI/2);this.scale.setScalar(1+intensity*0.45);this.matrix.scale(this.scale);this.matrix.setPosition(d.x,0.055,d.y);
+      this.heat.setMatrixAt(d.id,this.matrix);this.heat.setColorAt(d.id,this.tint);
+      (this.stops[d.id].material as THREE.MeshBasicMaterial).color.set(draft.includes(d.id)?'#e28e42':'#31896b');
+      this.stops[d.id].scale.setScalar(draft.includes(d.id)?1.6:1);
+      const count=this.layer==='demand'?number(generated):this.layer==='load'?number(load*100)+'%':number(complaint*100)+'%';
+      this.labels[d.id].textContent=this.layer==='off'?t(d.name):t('layerStop',{name:t(d.name),count});
       this.labels[d.id].classList.toggle('selected',draft.includes(d.id));
     }
+    this.heat.instanceMatrix.needsUpdate=true;if(this.heat.instanceColor)this.heat.instanceColor.needsUpdate=true;
   }
+
   draw(time:number,world:World){
-    let car=0;
+    let car=0;const event=eventConfig(world);
     world.routes.forEach((r,i)=>{
+      if(event?.id==='repair'&&r.stops.includes(event.district))return;
       const path=this.paths[i],length=this.lengths[i];if(!path?.length||!length)return;
       for(let v=0;v<r.vehicles;v++){
-        let progress=(time*0.5+v*length/Math.max(1,r.vehicles))%(length*2);if(progress>length)progress=length*2-progress;
+        let progress=(time*0.5*(event?.speed??1)+v*length/Math.max(1,r.vehicles))%(length*2);if(progress>length)progress=length*2-progress;
         for(let k=1;k<path.length;k++){
           const segment=path[k].distanceTo(path[k-1]);
           if(progress>segment){progress-=segment;continue;}
           this.point.copy(path[k-1]).lerp(path[k],segment?progress/segment:0);this.point.y=0.2;
-          this.matrix.makeRotationY(Math.atan2(path[k].x-path[k-1].x,path[k].z-path[k-1].z));this.matrix.setPosition(this.point);this.cars.setMatrixAt(car++,this.matrix);break;
+          this.matrix.makeRotationY(Math.atan2(path[k].x-path[k-1].x,path[k].z-path[k-1].z));this.scale.set(r.mode==='marshrutka'?1:1.3,1,r.mode==='tram'?2:r.mode==='marshrutka'?1:1.6);this.matrix.scale(this.scale);
+          this.matrix.setPosition(this.point);this.cars.setMatrixAt(car,this.matrix);this.tint.set(D.colors[(r.id-1)%D.colors.length]);this.cars.setColorAt(car++,this.tint);break;
         }
       }
     });
-    this.cars.count=car;this.cars.instanceMatrix.needsUpdate=true;
+    this.cars.count=car;this.cars.instanceMatrix.needsUpdate=true;if(this.cars.instanceColor)this.cars.instanceColor.needsUpdate=true;
     for(const d of world.districts){this.projected.set(d.x,0.2,d.y).project(this.camera);const label=this.labels[d.id];label.style.left=`${(this.projected.x+1)*this.width/2}px`;label.style.top=`${(-this.projected.y+1)*this.height/2}px`;label.hidden=Math.abs(this.projected.x)>1||Math.abs(this.projected.y)>1;}
     this.renderer.render(this.scene,this.camera);this.frames++;
     const wallTime = performance.now() / 1000;

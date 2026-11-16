@@ -1,10 +1,13 @@
 import { t, number } from '../core/i18n';
-import { E, M } from '../sim/config';
-import { reserved, routeCost } from '../sim/commands';
-import type { Command, World } from '../sim/types';
+import { E } from '../sim/config';
+import { constructionCost } from '../sim/commands';
+import { routesPanel, fleetPanel, financePanel } from './panels';
+import type { Command, Mode, World } from '../sim/types';
 export class GameUI {
   onCommand: (cmd: Command) => void = () => {};
   onBuild: () => void = () => {};
+  onEdit: (id:number) => void = () => {};
+  onDraft: (action:string,index?:number) => void = () => {};
   onCancel: () => void = () => {};
   onConfirm: () => void = () => {};
   onSpeed: (speed: number) => void = () => {};
@@ -15,60 +18,98 @@ export class GameUI {
   onModal: (open: boolean) => void = () => {};
   private modal: HTMLDialogElement;
   private world!: World;
-  private tab = 'routes';
-  private panelSignature = '';
-  private toastTimer = 0;
+  private tab='';
+  private panelSignature='';
+  private draftSignature='';
+  private toastTimer=0;
+  mode: Mode='marshrutka';
   readonly mapHost: HTMLElement;
   constructor(host: HTMLElement) {
-    host.innerHTML = `<header><a class="brand" href="./"><span class="brand-mark">↗</span><span>${t('title')}</span></a><button id="help" aria-label="${t('help')}">?</button></header>
-      <main><div class="heading"><div><small>${t('stage')}</small><h1>${t('city')}<span>↗</span></h1><p>${t('subtitle')}</p></div><span id="date"></span></div>
-      <section class="stats">${['budget','population','satisfaction','trust'].map(key=>`<article><small>${t(key)}</small><strong id="${key}"></strong></article>`).join('')}</section>
-      <div class="workspace"><section class="map-card"><div id="map"></div><div class="map-tools"><select id="layer" aria-label="${t('demand')}">${['off','demand','load','complaints'].map(key=>`<option value="${key}">${t(key)}</option>`).join('')}</select><button id="debug-toggle" aria-label="${t('debug')}">FPS</button></div><div class="zoom"><button id="zoom-in" aria-label="${t('zoomIn')}">+</button><button id="zoom-out" aria-label="${t('zoomOut')}">−</button><button id="recenter" aria-label="${t('recenter')}">⌖</button></div><output id="debug" hidden></output>
+    host.innerHTML=`<div id="map"></div><header><div class="city-name"><b>${t('city')}</b><small id="date"></small></div><button id="help" aria-label="${t('help')}">?</button></header>
+      <section class="stats">${['budget','population','satisfaction','trust','ecology'].map(key=>`<article><small>${t(key)}</small><strong id="${key}"></strong></article>`).join('')}</section>
+      <div class="map-tools"><select id="layer" aria-label="${t('layerLabel')}">${['off','demand','load','complaints'].map(key=>`<option value="${key}">${t(key)}</option>`).join('')}</select><button id="debug-toggle" aria-label="${t('debug')}">FPS</button></div><output id="layer-legend" hidden></output>
+      <button id="event-banner"></button><div id="crisis" hidden></div>
+      <div class="zoom"><button id="zoom-in" aria-label="${t('zoomIn')}">+</button><button id="zoom-out" aria-label="${t('zoomOut')}">−</button><button id="recenter" aria-label="${t('recenter')}">⌖</button></div><output id="debug" hidden></output>
       <div class="map-bottom"><span id="growth"></span><div class="speed">${[0,1,2].map(n=>`<button data-speed="${n}" class="${n===1?'active':''}" aria-label="${n===0?t('pause'):t('speed')+' '+n}">${n===0?'Ⅱ':n+'×'}</button>`).join('')}</div></div>
-      <div id="build-bar" hidden><b>${t('buildHint')}</b><span id="selection"></span><div><button id="cancel">${t('cancel')}</button><button id="confirm" class="primary"></button></div></div></section>
-      <aside><nav>${['routes','fleet','finance'].map(key=>`<button data-tab="${key}" class="${key==='routes'?'active':''}">${t(key)}</button>`).join('')}</nav><div id="panel"></div><section class="goal"><small>${t('goal')}</small><p id="goal-text"></p></section></aside></div>
-      <footer><span>${t('networkOffline')}</span><button id="reset">${t('reset')}</button></footer></main><dialog id="modal"><div id="dialog-body"></div><button id="close">${t('close')}</button></dialog><div id="toast" role="status"></div>`;
+      <aside hidden><div class="panel-top"><b id="panel-title"></b><button id="panel-close" aria-label="${t('close')}">×</button></div><div id="panel"></div></aside>
+      <div id="build-bar" hidden><b id="build-hint"></b><small>${t('draftHint')}</small><div id="selection"></div><div class="draft-tools"><select id="draft-end"><option value="end">${t('appendEnd')}</option><option value="start">${t('appendStart')}</option></select><button id="undo">↶</button><button id="clear-draft">${t('clearDraft')}</button></div><div class="build-actions"><button id="cancel">${t('cancel')}</button><button id="confirm" class="primary"></button></div></div>
+      <nav>${['map','routes','fleet','finance'].map(key=>`<button data-tab="${key}" class="${key==='map'?'active':''}">${t(key)}</button>`).join('')}</nav>
+      <dialog id="modal"><div id="dialog-body"></div><button id="close">${t('close')}</button></dialog><div id="toast" role="status"></div>`;
     this.mapHost=document.querySelector('#map')!;this.modal=document.querySelector('#modal')!;
     const click=(id:string,fn:()=>void)=>{document.getElementById(id)!.onclick=fn;};
-    click('help',()=>this.showDialog(`<h2>${t('help')}</h2><p>${t('helpText')}</p>`));
+    click('help',()=>this.showDialog(`<h2>${t('help')}</h2><p>${t('helpText')}</p><button id="reset">${t('reset')}</button>`));
+    this.modal.addEventListener('click',e=>{if((e.target as HTMLElement).id==='reset'){
+      this.showDialog(`<h2>${t('resetTitle')}</h2><p>${t('resetText')}</p><button id="reset-confirm" class="primary">${t('resetConfirm')}</button>`);
+      click('reset-confirm',()=>{this.onReset();this.modal.close();});
+    }});
     click('close',()=>this.modal.close());this.modal.addEventListener('close',()=>this.onModal(false));
-    click('reset',()=>{this.showDialog(`<h2>${t('resetTitle')}</h2><p>${t('resetText')}</p><button id="reset-confirm" class="primary">${t('resetConfirm')}</button>`);click('reset-confirm',()=>{this.onReset();this.modal.close();});});
+    click('panel-close',()=>this.openPanel('map'));
     click('cancel',()=>this.onCancel());click('confirm',()=>this.onConfirm());
+    click('undo',()=>this.onDraft('undo'));click('clear-draft',()=>this.onDraft('clear'));
+    document.getElementById('undo')!.setAttribute('aria-label',t('undo'));
+    document.getElementById('draft-end')!.onchange=e=>this.onDraft((e.target as HTMLSelectElement).value);
+    document.getElementById('selection')!.onclick=e=>{const b=(e.target as HTMLElement).closest<HTMLElement>('[data-index]');if(b)this.onDraft('remove',Number(b.dataset.index));};
     click('zoom-in',()=>this.onZoom(1.2));click('zoom-out',()=>this.onZoom(1/1.2));click('recenter',()=>this.onRecenter());
     click('debug-toggle',()=>{document.getElementById('debug')!.hidden=!document.getElementById('debug')!.hidden;});
-    document.querySelector<HTMLSelectElement>('#layer')!.onchange=e=>this.onLayer((e.target as HTMLSelectElement).value);
-    document.querySelectorAll<HTMLButtonElement>('[data-tab]').forEach(button=>button.onclick=()=>{this.tab=button.dataset.tab!;this.panelSignature='';this.update(this.world);document.querySelectorAll('[data-tab]').forEach(b=>b.classList.toggle('active',b===button));});
+    click('event-banner',()=>{const id=this.world.event?.id??this.world.nextEvent.id;this.showDialog(`<h2>${t(id)}</h2><p>${t(id+'Text')}</p>`);});
+    document.querySelector<HTMLSelectElement>('#layer')!.onchange=e=>{
+      const layer=(e.target as HTMLSelectElement).value;this.onLayer(layer);
+      const legend=document.getElementById('layer-legend')!;legend.hidden=layer==='off';legend.textContent=t('layer'+layer[0].toUpperCase()+layer.slice(1));
+    };
+    document.querySelectorAll<HTMLButtonElement>('[data-tab]').forEach(b=>b.onclick=()=>this.openPanel(b.dataset.tab!));
     document.querySelectorAll<HTMLButtonElement>('[data-speed]').forEach(button=>button.onclick=()=>{this.onSpeed(Number(button.dataset.speed));document.querySelectorAll('[data-speed]').forEach(b=>b.classList.toggle('active',b===button));});
-    document.getElementById('panel')!.onclick=e=>{
-      const button=(e.target as HTMLElement).closest<HTMLButtonElement>('button');if(!button)return;
-      if(button.dataset.action==='build')this.onBuild();
-      if(button.dataset.action==='buy')this.onCommand({type:'buyVehicle'});
-      if(button.dataset.assign)this.onCommand({type:'assignVehicle',routeId:Number(button.dataset.assign)});
-      if(button.dataset.remove)this.onCommand({type:'removeRoute',routeId:Number(button.dataset.remove)});
+    const panel=document.getElementById('panel')!;
+    panel.onchange=e=>{if((e.target as HTMLElement).id==='route-mode')this.mode=(e.target as HTMLSelectElement).value as Mode;};
+    panel.onsubmit=e=>{e.preventDefault();this.onCommand({type:'setFare',fare:Number(document.querySelector<HTMLInputElement>('#fare-input')!.value)});};
+    panel.onclick=e=>{
+      const b=(e.target as HTMLElement).closest<HTMLButtonElement>('button');if(!b)return;
+      if(b.dataset.action==='build')this.onBuild();
+      if(b.dataset.buy)this.onCommand({type:'buyVehicle',mode:b.dataset.buy as Mode});
+      if(b.dataset.service)this.onCommand({type:'serviceFleet',mode:b.dataset.service as Mode});
+      if(b.dataset.action==='loan')this.onCommand({type:'takeLoan'});
+      if(b.dataset.action==='repay')this.onCommand({type:'repayLoan'});
+      if(b.dataset.assign)this.onCommand({type:'assignVehicle',routeId:Number(b.dataset.assign)});
+      if(b.dataset.release)this.onCommand({type:'releaseVehicle',routeId:Number(b.dataset.release)});
+      if(b.dataset.edit||b.dataset.extend)this.onEdit(Number(b.dataset.edit??b.dataset.extend));
+      if(b.dataset.remove){const id=Number(b.dataset.remove);this.showDialog(`<h2>${t('removeTitle',{id})}</h2><p>${t('removeText')}</p><button id="remove-confirm" class="primary">${t('removeConfirm')}</button>`);click('remove-confirm',()=>{this.onCommand({type:'removeRoute',routeId:id});this.modal.close();});}
     };
   }
-  private showDialog(html:string){document.getElementById('dialog-body')!.innerHTML=html;this.onModal(true);this.modal.showModal();}
+  openPanel(tab:string){
+    this.tab=tab==='map'?'':tab;document.querySelector('aside')!.hidden=!this.tab;
+    document.getElementById('panel-title')!.textContent=this.tab?t(this.tab):'';
+    document.querySelectorAll<HTMLButtonElement>('[data-tab]').forEach(b=>b.classList.toggle('active',b.dataset.tab===(this.tab||'map')));
+    this.panelSignature='';if(this.world)this.update(this.world);
+  }
+  private showDialog(html:string){document.getElementById('dialog-body')!.innerHTML=html;this.onModal(true);if(!this.modal.open)this.modal.showModal();}
   toast(key:string){const el=document.getElementById('toast')!;el.textContent=t(key);el.classList.add('show');clearTimeout(this.toastTimer);this.toastTimer=window.setTimeout(()=>el.classList.remove('show'),4000);}
   update(w:World){
     this.world=w;
     const text=(id:string,value:string)=>{document.getElementById(id)!.textContent=value;};
     text('budget',number(w.money)+' ₽');text('population',number(w.districts.reduce((s,d)=>s+d.population,0)));
-    text('satisfaction',number(w.satisfaction)+'%');text('trust',number(w.trust)+'%');
+    for(const key of ['satisfaction','trust','ecology'] as const)text(key,number(w[key])+'%');
     text('date',t('month',{count:Math.floor(w.minute/(E.minutesPerDay*E.daysPerMonth))+1})+' · '+t('day',{count:Math.floor(w.minute/E.minutesPerDay)%E.daysPerMonth+1}));
     text('growth',t('growth',{count:number(w.lastGrowth)}));
-    text('goal-text',t(w.routes.some(r=>r.vehicles>0&&r.stops.includes(6))?'goalDone':'goalText'));
-    const signature=JSON.stringify([this.tab,w.routes,w.fleet,Math.floor(w.income),Math.floor(w.expenses),Math.floor(w.served)]);
+    text('event-banner',t(w.event?'eventActive':'forecast',{event:t(w.event?.id??w.nextEvent.id),minutes:Math.max(0,(w.event?.until??w.nextEvent.at)-w.minute)}));
+    const crisis=document.getElementById('crisis')!;crisis.hidden=!w.gameOver&&w.trust>=E.crisisTrust;crisis.textContent=t(w.gameOver?'gameOver':'crisis');
+    if(!this.tab)return;
+    const panel=document.getElementById('panel')!;
+    if(panel.contains(document.activeElement)&&['INPUT','SELECT'].includes(document.activeElement!.tagName))return;
+    const signature=JSON.stringify([this.tab,w.routes,w.fleets,Math.floor(w.money),Math.floor(w.income),Math.floor(w.expenses),Math.floor(w.served),w.fare,w.debt,w.event,w.wear]);
     if(signature===this.panelSignature)return;this.panelSignature=signature;
-    let html='';
-    if(this.tab==='routes')html=`<div class="section-heading"><h2>${t('routes')}</h2><span>${w.routes.length}</span></div><button class="primary wide" data-action="build">＋ ${t('buildRoute')}</button>`+w.routes.map((r,i)=>`<article class="route-card"><h3><i style="background:var(--line-${i%6})"></i>${t('route',{id:r.id})}</h3><p>${r.stops.map(id=>t(w.districts[id].name)).join(' → ')}</p><small>${t('vehicles',{count:r.vehicles})} · ${t('passengers',{count:number(r.served)})}</small><div class="route-actions"><button data-assign="${r.id}">${t('assign')}</button><button data-remove="${r.id}" class="muted">${t('remove')}</button></div></article>`).join('');
-    if(this.tab==='fleet')html=`<h2>${t('fleet')}</h2><strong class="big">${w.fleet}</strong><p>${t('vehicles',{count:w.fleet})}</p><p>${t('reserve',{count:reserved(w)})}</p><button class="primary wide" data-action="buy">${t('buy',{cost:number(M.price)})}</button>`;
-    if(this.tab==='finance')html=`<h2>${t('finance')}</h2><p>${t('fare',{cost:w.fare})}</p><article class="finance-row">${t('income')}<strong>${number(w.income)} ₽</strong></article><article class="finance-row">${t('expenses')}<strong>${number(w.expenses)} ₽</strong></article><p>${t('passengers',{count:number(w.served)})}</p>`;
-    document.getElementById('panel')!.innerHTML=html;
+    panel.innerHTML=this.tab==='routes'?routesPanel(w,this.mode):this.tab==='fleet'?fleetPanel(w):financePanel(w);
   }
-  build(draft:number[]|null){
+  build(draft:number[]|null,routeId?:number){
     document.getElementById('build-bar')!.hidden=draft===null;
-    if(draft){document.getElementById('selection')!.textContent=draft.map(id=>t(this.world.districts[id].name)).join(' → ')||t('selected',{count:0});const button=document.querySelector<HTMLButtonElement>('#confirm')!;button.textContent=t('confirm',{cost:number(routeCost(draft.length))});button.disabled=draft.length<2;}
+    if(!draft){this.draftSignature='';return;}
+    const signature=JSON.stringify([draft,routeId,this.mode]);if(signature===this.draftSignature)return;this.draftSignature=signature;
+    if(draft){
+      document.getElementById('build-hint')!.textContent=t(routeId?'editHint':'buildHint');
+      document.getElementById('selection')!.innerHTML=draft.map((id,index)=>`<button data-index="${index}" aria-label="${t('draftRemove',{name:t(this.world.districts[id].name)})}">${index+1}. ${t(this.world.districts[id].name)} ×</button>`).join('')||t('selected',{count:0});
+      const button=document.querySelector<HTMLButtonElement>('#confirm')!;
+      const mode=this.world.routes.find(r=>r.id===routeId)?.mode??this.mode;
+      button.textContent=t(routeId?'editConfirm':'confirm',{cost:number(constructionCost(this.world,draft,mode,routeId))});button.disabled=draft.length<2;
+    }
   }
+  resetDraftEnd(){document.querySelector<HTMLSelectElement>('#draft-end')!.value='end';}
   debug(text:string){document.getElementById('debug')!.textContent=text;}
 }
-
