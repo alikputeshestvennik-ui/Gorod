@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#132b29">
+  <meta name="description" content="Городской маршрут — транспортная стратегия. Соединяйте районы, развивайте парк и решайте судьбу Верхнереченска.">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="style.css">
+  <title>Городской маршрут — транспортная стратегия</title>
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="./" aria-label="Городской маршрут"><span class="brand-icon">↗</span><span>ГОРОДСКОЙ<br><b>МАРШРУТ<span class="brand-dot">.</span></b></span></a>
+    <nav aria-label="Разделы игры"><button class="nav active" data-panel="map">Карта города</button><button class="nav" data-panel="fleet">Автопарк</button><button class="nav" data-panel="finance">Финансы</button><button class="nav" data-panel="journal">История <span class="nav-dot"></span></button></nav>
+    <button id="help" class="icon-button" aria-label="Как играть">?</button>
+  </header>
+  <main>
+    <section class="city-header">
+      <div><div class="eyebrow"><span class="live-dot"></span> ВАШ ГОРОД · ГЛАВА 01</div><h1>Верхнереченск<span>↗</span></h1><p>Большой город начинается с маленького маршрута.</p></div>
+      <div class="date-card"><span id="date">1 мая · 08:00</span><small id="weather">☀ +18° · Весна</small></div>
+    </section>
+    <section class="stats" aria-label="Показатели города">
+      <div class="stat"><span class="stat-icon">₽</span><div><small>Бюджет</small><strong id="money">85 000 ₽</strong><span id="profit" class="stat-caption">Билеты и расходы за час</span></div></div>
+      <div class="stat"><span class="stat-icon">♧</span><div><small>Население</small><strong id="population">5 000</strong><span class="stat-caption" id="growth">Город просыпается</span></div></div>
+      <div class="stat"><span class="stat-icon smile">☺</span><div><small>Довольство</small><strong id="happiness">68<span>%</span></strong><span class="stat-caption" id="mood">Есть куда расти</span></div></div>
+      <div class="stat"><span class="stat-icon">◇</span><div><small>Доверие мэра</small><strong id="trust">65<span>%</span></strong><span class="stat-caption" id="trust-label">Кредит доверия</span></div></div>
+    </section>
+    <div class="workspace">
+      <aside class="sidebar">
+        <section class="panel lines-panel">
+          <div class="panel-heading"><div><span class="eyebrow">ТРАНСПОРТНАЯ СЕТЬ</span><h2>Ваши маршруты <span id="route-count" class="count">1</span></h2></div><span class="tiny-bus">▰</span></div>
+          <div id="routes"></div>
+          <button id="new-route" class="primary wide"><span>＋</span> Создать маршрут</button>
+          <div class="panel-foot"><span class="live-dot"></span><span id="fleet-summary">2 маршрутки · 1 в резерве</span></div>
+        </section>
+        <section class="panel mission-panel"><div class="mission-top"><span class="eyebrow">СЛЕДУЮЩИЙ ШАГ</span><span id="mission-index">01 / 03</span></div><div class="mission-symbol">↗</div><h3 id="mission-title">Ближе к людям</h3><p id="mission-text">Жителям нужен транспорт до больницы. Проложите новый маршрут.</p><div class="progress"><i id="mission-progress"></i></div><div class="mission-bottom"><span id="mission-detail">Соедините больницу с городом</span><b id="mission-reward">+8 000 ₽</b></div></section>
+        <section class="advisor"><div class="avatar">СИ</div><div><b>Степан Ильич <span>· водитель</span></b><p id="advisor-text">«Начальник, люди на остановках. Давайте свяжем берега!»</p></div></section>
+      </aside>
+      <section class="map-card" aria-label="Интерактивная карта города">
+        <div class="map-top"><div class="map-label"><span class="live-dot"></span><b id="map-mode">Город живёт</b><span id="map-subtitle">12 остановок · 2 берега</span></div><button id="layers" class="map-button" title="Показать спрос">◈ <span>Спрос</span></button></div>
+        <canvas id="city" aria-label="Карта. Выберите остановку, чтобы узнать о пассажирах, или создайте маршрут." tabindex="0"></canvas>
+        <div class="map-watermark">ВЕРХНЕРЕЧЕНСК <span>ТРАНСПОРТНОЕ УПРАВЛЕНИЕ</span></div>
+        <div class="map-zoom"><button id="zoom-in" aria-label="Приблизить">＋</button><button id="zoom-out" aria-label="Отдалить">−</button><button id="recenter" aria-label="Вернуть камеру">⌖</button></div>
+        <div id="build-bar" class="build-bar" hidden><div><b id="build-title">Новый маршрут</b><span id="build-description">Выбирайте остановки на карте</span></div><div class="build-actions"><button id="undo-stop" class="secondary" aria-label="Убрать последнюю остановку">↶</button><button id="cancel-route" class="secondary">Отмена</button><button id="confirm-route" class="primary" disabled>Открыть</button></div></div>
+        <div id="stop-card" class="stop-card" hidden></div>
+        <div class="map-bottom"><div class="legend"><span><i class="legend-route"></i>Маршрут</span><span><i class="legend-stop"></i>Остановка</span><span class="legend-demand"><i></i>Пассажиры</span></div><div class="time-controls"><button id="pause" aria-label="Приостановить игру">Ⅱ</button><button data-speed="1" class="selected">1×</button><button data-speed="2">2×</button><button data-speed="4">4×</button></div></div>
+      </section>
+    </div>
+    <footer><span><i class="live-dot"></i> <span id="save-status">Прогресс сохраняется на устройстве</span></span><span>МАЛЕНЬКИЕ МАРШРУТЫ. БОЛЬШИЕ ПЕРЕМЕНЫ.</span><button id="settings">Новая игра</button></footer>
+  </main>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <dialog id="modal"><div id="modal-content"></div></dialog>
+  <script src="engine.js"></script>
+  <script src="game.js"></script>
+</body>
+</html>

@@ -1,0 +1,527 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#132b29">
+  <meta name="description" content="Городской маршрут — транспортная стратегия. Соединяйте районы, развивайте парк и решайте судьбу Верхнереченска.">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22192%22%20height%3D%22192%22%20viewBox%3D%220%200%20192%20192%22%3E%3Crect%20width%3D%22192%22%20height%3D%22192%22%20rx%3D%2242%22%20fill%3D%22%2318332e%22%2F%3E%3Cpath%20d%3D%22M49%20139%20138%2050M65%2050h73v73%22%20stroke%3D%22%23d8f786%22%20stroke-width%3D%2218%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20fill%3D%22none%22%2F%3E%3C%2Fsvg%3E%0A" type="image/svg+xml">
+  <style>
+:root{--bg:#f4f5f0;--ink:#18332e;--muted:#85908b;--line:#e4e8df;--green:#236b51;--lime:#d8f786;--card:#fff;--orange:#ed9561}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:Manrope,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-size:14px}button,a{-webkit-tap-highlight-color:transparent}button{font:inherit;cursor:pointer;border:0;transition:background .18s,transform .18s}button:hover{filter:brightness(.96)}button:active{transform:translateY(1px)}button:focus-visible,a:focus-visible,canvas:focus-visible{outline:3px solid #78ba61;outline-offset:3px}button:disabled{opacity:.45;cursor:not-allowed}button[hidden],[hidden]{display:none!important}.topbar{height:88px;padding:0 4.2%;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line);background:#fafbf7;gap:25px}.brand{display:flex;gap:12px;align-items:center;color:var(--ink);text-decoration:none;font-size:11px;letter-spacing:2px;line-height:1.5}.brand b{font-size:17px;letter-spacing:1.2px}.brand-dot{color:#70a95b}.brand-icon{width:43px;height:43px;border-radius:12px;background:var(--ink);color:var(--lime);font-size:34px;display:grid;place-items:center;font-weight:500;line-height:1}.topbar nav{display:flex;align-items:center;gap:26px;height:100%}.nav{height:100%;position:relative;background:none;color:#8a928b;font-size:12px;font-weight:700;padding:0 7px}.nav.active{color:var(--ink)}.nav.active:after{content:'';position:absolute;bottom:0;left:5px;right:5px;height:3px;background:var(--green);border-radius:2px}.nav-dot{display:inline-block;width:5px;height:5px;background:var(--orange);border-radius:50%;vertical-align:top;margin:3px}.icon-button{height:31px;width:31px;border:1px solid #d5dcd1;border-radius:50%;background:none;color:var(--ink);font-weight:700}main{max-width:1530px;margin:0 auto;padding:32px 4.2% 0}.city-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:25px}.eyebrow{font-size:9px;font-weight:800;letter-spacing:1.7px;color:#8c978b}.live-dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:#88ab60;margin-right:7px;vertical-align:middle}h1{font-size:32px;letter-spacing:-1.4px;margin:7px 0 6px;font-weight:800}h1>span{font-size:25px;color:#97ad83;vertical-align:middle;margin-left:15px;font-weight:400}.city-header p{font-size:11px;color:#89928a;margin:0}.date-card{text-align:right;font-size:12px;font-weight:700}.date-card small{display:block;color:#8c968b;font-weight:500;font-size:10px;margin-top:7px}.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:25px}.stat{background:var(--card);border:1px solid var(--line);border-radius:14px;min-height:103px;padding:20px 19px;display:flex;gap:15px;align-items:flex-start}.stat-icon{font-size:20px;color:#7d917b;background:#f3f6ee;width:34px;height:34px;border-radius:10px;display:grid;place-items:center}.stat small{display:block;color:#839080;font-size:10px;margin-bottom:4px}.stat strong{display:block;font-size:23px;line-height:1.15;font-weight:800;letter-spacing:-.7px;white-space:nowrap}.stat strong>span{font-size:14px;margin-left:3px;color:#a0aa99}.stat-caption{display:block;font-size:9px;margin-top:7px;color:#7e9572}.workspace{display:grid;grid-template-columns:292px 1fr;gap:22px;align-items:stretch}.sidebar{display:flex;flex-direction:column;gap:16px}.panel{background:var(--card);border:1px solid var(--line);border-radius:15px;padding:21px}.panel-heading{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}h2{font-size:16px;letter-spacing:-.5px;margin:7px 0 0}.count{font-size:10px;display:inline-grid;place-items:center;background:#edf2e8;border-radius:5px;min-width:20px;height:20px;margin-left:5px;vertical-align:middle;color:#718366}.tiny-bus{color:#93a087;font-size:23px}.route-item{display:block;width:100%;text-align:left;background:#fbfcf9;padding:14px 12px;border:1px solid #edf0e8;border-radius:10px;margin-bottom:10px;color:var(--ink)}.route-top{display:flex;align-items:center;justify-content:space-between;gap:5px}.route-name{font-size:11px;font-weight:800}.route-badge{display:inline-grid;place-items:center;background:var(--route);color:#fff;border-radius:5px;min-width:22px;height:22px;margin-right:7px;font-size:10px}.route-status{font-size:8px;color:#7f9474;background:#eff5e9;border-radius:4px;padding:4px;white-space:nowrap}.route-description{display:block;font-size:9px;color:#939b90;margin:10px 0 9px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.route-meta{font-size:9px;color:#83937c;display:flex;justify-content:space-between}.primary{background:var(--ink);color:var(--lime);padding:13px 17px;border-radius:9px;font-weight:700;font-size:11px}.primary.wide{width:100%;margin-top:4px}.primary.wide span{margin-right:8px;font-size:15px}.secondary{border:1px solid #dfe5d9;border-radius:8px;padding:11px 14px;background:#f7f9f3;color:var(--ink);font-size:11px;font-weight:700}.danger{color:#b45544}.panel-foot{font-size:9px;color:#99a18f;margin-top:15px;text-align:center}.mission-panel{background:#edf1e2;position:relative;overflow:hidden;border-color:#e0e8d4;min-height:205px}.mission-top{display:flex;justify-content:space-between;font-size:9px;color:#99a588}.mission-top .eyebrow{color:#819574;font-size:8px}.mission-symbol{position:absolute;right:22px;top:44px;font-size:44px;color:#d5dfc5}.mission-panel h3{position:relative;font-size:16px;margin:22px 0 8px;letter-spacing:-.4px}.mission-panel p{position:relative;font-size:10px;line-height:1.8;color:#849173;max-width:205px;margin:0 0 18px}.progress{height:4px;border-radius:4px;background:#dae3cd;overflow:hidden}.progress i{display:block;width:10%;height:100%;background:#8cae63;border-radius:4px;transition:width 1s}.mission-bottom{display:flex;justify-content:space-between;font-size:8px;gap:6px;margin-top:10px;color:#93a180}.mission-bottom b{color:#708d4f;white-space:nowrap}.advisor{display:flex;gap:11px;padding:4px 3px 2px;align-items:flex-start}.avatar{width:33px;height:33px;flex:none;border-radius:50%;background:#e2e6db;color:#839374;display:grid;place-items:center;font-size:10px;font-weight:800}.advisor b{display:block;font-size:9px;margin:2px 0 6px}.advisor b span{font-weight:500;color:#9aa18f}.advisor p{font-size:10px;line-height:1.7;color:#8c9682;margin:0}.map-card{background:#e9eee0;border:1px solid #dfe5d7;border-radius:17px;position:relative;min-height:580px;overflow:hidden;isolation:isolate}.map-top{position:absolute;z-index:2;left:22px;right:20px;top:20px;display:flex;justify-content:space-between;align-items:flex-start;pointer-events:none}.map-label{font-size:10px}.map-label b{font-weight:700}.map-label>span:last-child{display:block;margin:6px 0 0 14px;color:#98a58e;font-size:8px}.map-button{pointer-events:auto;background:#f8faf4e6;border:1px solid #dce4d5;border-radius:8px;padding:9px 11px;font-size:14px;color:#687c5d}.map-button span{font-size:9px;margin-left:4px}.map-button.active{background:var(--ink);color:var(--lime)}#city{position:absolute;width:100%;height:100%;display:block;touch-action:none;cursor:grab}#city.building{cursor:crosshair}.map-watermark{position:absolute;left:24px;bottom:75px;color:#9cad8b;font-size:8px;letter-spacing:2px;pointer-events:none}.map-watermark span{display:block;font-size:5px;letter-spacing:1.3px;margin-top:5px}.map-zoom{position:absolute;right:20px;bottom:80px;display:flex;flex-direction:column;background:#fbfcf7e8;border:1px solid #dbe3d4;border-radius:9px;overflow:hidden}.map-zoom button{width:32px;height:32px;background:none;color:#718565;font-size:17px}.map-zoom button+button{border-top:1px solid #e3e8db}.map-bottom{position:absolute;left:0;right:0;bottom:0;min-height:54px;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 20px;background:#f6f9f0e8;border-top:1px solid #dfe7d6;backdrop-filter:blur(10px)}.legend{display:flex;gap:15px;font-size:8px;color:#91a085;align-items:center}.legend>span{display:flex;align-items:center;gap:6px}.legend-route{display:inline-block;width:15px;height:3px;background:#3a9672;border-radius:4px}.legend-stop{width:6px;height:6px;border:2px solid #9bad87;border-radius:50%;background:white}.legend-demand i{width:5px;height:5px;border-radius:50%;background:var(--orange)}.time-controls{display:flex;gap:3px;align-items:center}.time-controls button{width:29px;height:28px;border-radius:6px;background:none;color:#87987b;font-size:10px;font-weight:700}.time-controls button.selected{background:var(--ink);color:var(--lime)}.build-bar{position:absolute;bottom:66px;left:14px;right:14px;background:#fffffff2;border-radius:12px;padding:15px;box-shadow:0 8px 30px #20362717;display:flex;justify-content:space-between;gap:12px;align-items:center}.build-bar b{display:block;font-size:12px}.build-bar span{display:block;font-size:9px;color:#899880;margin-top:4px}.build-actions{display:flex;gap:5px;flex:none}.stop-card{position:absolute;top:77px;left:20px;max-width:250px;background:#fffffff2;box-shadow:0 8px 25px #18332e13;border:1px solid #dde5d4;border-radius:12px;padding:16px;font-size:11px}.stop-card p{font-size:10px;color:#899880;line-height:1.8}.stop-card button{font-size:10px}.stop-card h3{margin:0 0 7px;font-size:13px}.stop-card .close-stop{position:absolute;right:7px;top:7px;background:none;color:#8c9983}.stop-card .stop-lines{display:flex;gap:5px;margin:10px 0}.stop-chip{padding:4px 7px;border-radius:4px;background:#eaf1df;color:#74855f;font-size:9px}footer{display:flex;justify-content:space-between;align-items:center;gap:15px;padding:22px 0;color:#a0aa95;font-size:8px}footer>span:nth-child(2){letter-spacing:1.1px;font-size:7px}footer button{background:none;color:#91a086;font-size:9px}.toast{position:fixed;z-index:20;bottom:25px;left:50%;transform:translate(-50%,15px);opacity:0;pointer-events:none;transition:.25s;background:var(--ink);color:#ecf5de;padding:15px 23px;border-radius:11px;box-shadow:0 8px 30px #10271d33;font-size:12px;max-width:90vw;text-align:center}.toast.show{opacity:1;transform:translate(-50%,0)}dialog{border:1px solid #e1e8d9;border-radius:20px;padding:0;background:#fbfcf8;color:var(--ink);width:min(480px,92vw);max-height:85dvh;box-shadow:0 25px 100px #132b2933}dialog::backdrop{background:#17342e70;backdrop-filter:blur(5px)}#modal-content{padding:30px}dialog h2{font-size:24px;margin:10px 0 15px;letter-spacing:-.8px}dialog h3{font-size:14px;margin:20px 0 9px}dialog p{font-size:12px;line-height:1.9;color:#79886f}dialog .dialog-actions{display:flex;gap:9px;margin-top:22px;flex-wrap:wrap}dialog .eyebrow{color:#8b9d7b}.dialog-top{display:flex;justify-content:space-between;align-items:center}.dialog-close{background:#edf1e7;color:#7b8e6a;width:29px;height:29px;border-radius:50%;font-size:18px}.dialog-list{border-top:1px solid var(--line);margin-top:12px}.dialog-row{padding:13px 0;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;gap:12px;font-size:11px;align-items:center}.dialog-row small{color:#98a68d;font-size:9px;display:block;margin-top:5px}.dialog-row strong{font-size:13px}.dialog-balance{font-size:32px;letter-spacing:-1px;margin:18px 0;font-weight:800}.dialog-fare{display:flex;align-items:center;gap:15px;margin-top:15px}.dialog-fare button{width:35px;height:35px}.dialog-fare strong{font-size:20px}.journal-entry{font-size:11px;line-height:1.8;padding:12px 0;border-bottom:1px solid var(--line);color:#7f8d73}.journal-entry time{display:block;font-size:8px;color:#a0ac95;margin-bottom:3px}.empty{font-size:11px;line-height:1.7;color:#98a68d;margin:20px 0}.help-step{display:flex;gap:13px;margin:17px 0;font-size:11px;line-height:1.8;color:#7e8e74}.help-step>b{background:#e9efdd;color:#7b935e;border-radius:7px;width:26px;height:26px;flex:none;text-align:center;line-height:26px}input[type=range]{width:100%;accent-color:#337d56}.route-select{width:100%;padding:10px;background:#f4f7ed;border:1px solid var(--line);border-radius:8px;color:var(--ink);font:inherit;font-size:11px}.choice{display:block;text-align:left;width:100%;padding:15px;margin:10px 0;border-radius:11px;border:1px solid #dae4d1;background:#f2f6e9;color:var(--ink)}.choice b{display:block;font-size:12px;margin-bottom:6px}.choice small{font-size:10px;line-height:1.7;color:#8b9b7d}.intro-mark{font-size:50px;color:#809f60;line-height:1.3}.scroll-hint{display:none}
+@media(min-width:1450px){.map-card{min-height:670px}.workspace{grid-template-columns:320px 1fr}.panel{padding:24px}.route-item{padding:17px}.mission-panel{min-height:228px}.advisor{padding-top:10px}}
+@media(max-width:1050px){.stats{gap:10px}.stat{padding:17px 12px;gap:9px}.stat strong{font-size:20px}.stat-icon{width:29px;height:29px}.workspace{grid-template-columns:255px 1fr;gap:15px}.panel{padding:17px}.map-card{min-height:580px}.legend{gap:9px}.legend-demand{display:none!important}.topbar nav{gap:12px}.build-bar{flex-direction:column;align-items:stretch}.build-actions{justify-content:flex-end}.build-bar span{font-size:10px}}
+@media(max-width:760px){.topbar{height:71px;padding:0 20px;gap:10px}.brand-icon{width:35px;height:35px;border-radius:10px;font-size:29px}.brand{font-size:8px;gap:8px;letter-spacing:1.2px}.brand b{font-size:13px}.topbar nav{gap:5px;margin-left:auto}.nav{font-size:10px;padding:0 6px}.nav[data-panel=journal]{display:none}.icon-button{width:26px;height:26px;font-size:11px}main{padding:22px 18px 0}.city-header{margin-bottom:19px}h1{font-size:26px}.city-header p{font-size:9px;max-width:230px;line-height:1.6}.date-card{font-size:10px}.date-card small{font-size:9px}.eyebrow{font-size:8px;letter-spacing:1.2px}.stats{grid-template-columns:repeat(4,1fr);gap:7px;margin-bottom:16px}.stat{padding:12px 9px;display:block;min-height:85px;border-radius:11px}.stat-icon{display:none}.stat small{font-size:8px}.stat strong{font-size:17px;letter-spacing:-.6px}.stat-caption{font-size:7px;line-height:1.5;margin-top:6px}.stat strong>span{font-size:10px}.workspace{display:flex;flex-direction:column;gap:15px}.map-card{order:-1;min-height:490px;height:59dvh;max-height:650px}.sidebar{display:grid;grid-template-columns:1fr 1fr;gap:12px}.advisor{grid-column:1/-1;padding:3px 5px 9px}.panel{padding:16px;border-radius:12px}.panel-heading{margin-bottom:14px}h2{font-size:14px}.panel-heading .eyebrow{font-size:7px}.tiny-bus{display:none}.route-item{padding:10px}.route-name{font-size:9px}.route-badge{min-width:19px;height:19px;margin-right:4px;font-size:8px}.route-status{display:none}.route-description{font-size:8px}.route-meta{font-size:8px}.mission-panel{min-height:200px}.mission-panel h3{font-size:14px}.mission-panel p{font-size:9px}.mission-symbol{font-size:35px;right:15px}.mission-bottom{display:block;font-size:8px;line-height:1.8}.mission-bottom b{display:block}.panel-foot{font-size:8px;line-height:1.5}.primary.wide{font-size:10px;padding:11px 6px}.map-top{left:15px;top:15px;right:15px}.map-bottom{padding:10px 13px}.map-watermark{left:16px}.map-zoom{right:14px}.map-label{font-size:10px}.map-label>span:last-child{font-size:8px}footer{padding-top:14px;flex-wrap:wrap}footer>span:nth-child(2){display:none}.build-bar{bottom:65px}.stop-card{top:65px;left:14px;max-width:230px}#modal-content{padding:24px}.legend{font-size:8px}.time-controls button{width:27px}.date-card{flex:none}.toast{font-size:11px}}
+@media(max-width:390px){.nav[data-panel=finance]{display:none}.stats{gap:5px}.stat strong{font-size:15px}.stat{padding:11px 7px}.city-header p{max-width:190px}.sidebar{grid-template-columns:1fr}.advisor{grid-column:1}.mission-panel{min-height:auto}.mission-panel h3{margin-top:15px}.mission-bottom{display:flex}.map-card{min-height:450px}h1{font-size:23px}.build-actions .secondary{padding:10px}.brand{gap:6px}}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+/* Keep every management section reachable on a phone. */
+@media(max-width:760px){.nav[data-panel=map]{display:none}.nav[data-panel=journal]{display:block}.nav[data-panel=finance]{display:block}}
+@media(max-width:390px){.topbar{padding:0 12px;gap:8px}.nav{font-size:9px;padding:0 3px}.topbar nav{gap:1px}.brand b{font-size:12px}.brand-icon{width:32px;height:32px}.brand{font-size:7px;letter-spacing:1px}}
+</style>
+  <title>Городской маршрут — транспортная стратегия</title>
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="./" aria-label="Городской маршрут"><span class="brand-icon">↗</span><span>ГОРОДСКОЙ<br><b>МАРШРУТ<span class="brand-dot">.</span></b></span></a>
+    <nav aria-label="Разделы игры"><button class="nav active" data-panel="map">Карта города</button><button class="nav" data-panel="fleet">Автопарк</button><button class="nav" data-panel="finance">Финансы</button><button class="nav" data-panel="journal">История <span class="nav-dot"></span></button></nav>
+    <button id="help" class="icon-button" aria-label="Как играть">?</button>
+  </header>
+  <main>
+    <section class="city-header">
+      <div><div class="eyebrow"><span class="live-dot"></span> ВАШ ГОРОД · ГЛАВА 01</div><h1>Верхнереченск<span>↗</span></h1><p>Большой город начинается с маленького маршрута.</p></div>
+      <div class="date-card"><span id="date">1 мая · 08:00</span><small id="weather">☀ +18° · Весна</small></div>
+    </section>
+    <section class="stats" aria-label="Показатели города">
+      <div class="stat"><span class="stat-icon">₽</span><div><small>Бюджет</small><strong id="money">85 000 ₽</strong><span id="profit" class="stat-caption">Билеты и расходы за час</span></div></div>
+      <div class="stat"><span class="stat-icon">♧</span><div><small>Население</small><strong id="population">5 000</strong><span class="stat-caption" id="growth">Город просыпается</span></div></div>
+      <div class="stat"><span class="stat-icon smile">☺</span><div><small>Довольство</small><strong id="happiness">68<span>%</span></strong><span class="stat-caption" id="mood">Есть куда расти</span></div></div>
+      <div class="stat"><span class="stat-icon">◇</span><div><small>Доверие мэра</small><strong id="trust">65<span>%</span></strong><span class="stat-caption" id="trust-label">Кредит доверия</span></div></div>
+    </section>
+    <div class="workspace">
+      <aside class="sidebar">
+        <section class="panel lines-panel">
+          <div class="panel-heading"><div><span class="eyebrow">ТРАНСПОРТНАЯ СЕТЬ</span><h2>Ваши маршруты <span id="route-count" class="count">1</span></h2></div><span class="tiny-bus">▰</span></div>
+          <div id="routes"></div>
+          <button id="new-route" class="primary wide"><span>＋</span> Создать маршрут</button>
+          <div class="panel-foot"><span class="live-dot"></span><span id="fleet-summary">2 маршрутки · 1 в резерве</span></div>
+        </section>
+        <section class="panel mission-panel"><div class="mission-top"><span class="eyebrow">СЛЕДУЮЩИЙ ШАГ</span><span id="mission-index">01 / 03</span></div><div class="mission-symbol">↗</div><h3 id="mission-title">Ближе к людям</h3><p id="mission-text">Жителям нужен транспорт до больницы. Проложите новый маршрут.</p><div class="progress"><i id="mission-progress"></i></div><div class="mission-bottom"><span id="mission-detail">Соедините больницу с городом</span><b id="mission-reward">+8 000 ₽</b></div></section>
+        <section class="advisor"><div class="avatar">СИ</div><div><b>Степан Ильич <span>· водитель</span></b><p id="advisor-text">«Начальник, люди на остановках. Давайте свяжем берега!»</p></div></section>
+      </aside>
+      <section class="map-card" aria-label="Интерактивная карта города">
+        <div class="map-top"><div class="map-label"><span class="live-dot"></span><b id="map-mode">Город живёт</b><span id="map-subtitle">12 остановок · 2 берега</span></div><button id="layers" class="map-button" title="Показать спрос">◈ <span>Спрос</span></button></div>
+        <canvas id="city" aria-label="Карта. Выберите остановку, чтобы узнать о пассажирах, или создайте маршрут." tabindex="0"></canvas>
+        <div class="map-watermark">ВЕРХНЕРЕЧЕНСК <span>ТРАНСПОРТНОЕ УПРАВЛЕНИЕ</span></div>
+        <div class="map-zoom"><button id="zoom-in" aria-label="Приблизить">＋</button><button id="zoom-out" aria-label="Отдалить">−</button><button id="recenter" aria-label="Вернуть камеру">⌖</button></div>
+        <div id="build-bar" class="build-bar" hidden><div><b id="build-title">Новый маршрут</b><span id="build-description">Выбирайте остановки на карте</span></div><div class="build-actions"><button id="undo-stop" class="secondary" aria-label="Убрать последнюю остановку">↶</button><button id="cancel-route" class="secondary">Отмена</button><button id="confirm-route" class="primary" disabled>Открыть</button></div></div>
+        <div id="stop-card" class="stop-card" hidden></div>
+        <div class="map-bottom"><div class="legend"><span><i class="legend-route"></i>Маршрут</span><span><i class="legend-stop"></i>Остановка</span><span class="legend-demand"><i></i>Пассажиры</span></div><div class="time-controls"><button id="pause" aria-label="Приостановить игру">Ⅱ</button><button data-speed="1" class="selected">1×</button><button data-speed="2">2×</button><button data-speed="4">4×</button></div></div>
+      </section>
+    </div>
+    <footer><span><i class="live-dot"></i> <span id="save-status">Прогресс сохраняется на устройстве</span></span><span>МАЛЕНЬКИЕ МАРШРУТЫ. БОЛЬШИЕ ПЕРЕМЕНЫ.</span><button id="settings">Новая игра</button></footer>
+  </main>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <dialog id="modal"><div id="modal-content"></div></dialog>
+  <script>window.CITY_ROUTE_PORTABLE=true;
+/* Deterministic simulation; no browser dependencies. One tick = five game minutes. */
+(function (root) {
+  'use strict';
+  var STOPS = [
+    {name:'Вокзал',x:1,y:10,type:'Транспортный узел',weight:1.6},
+    {name:'Старый город',x:1,y:7,type:'Жилой район',weight:1.1},
+    {name:'Площадь Мира',x:4,y:7,type:'Центр города',weight:1.6},
+    {name:'Рынок',x:4,y:4,type:'Торговый квартал',weight:1.4},
+    {name:'Завод',x:1,y:1,type:'Рабочие места',weight:1.3},
+    {name:'Университет',x:7,y:1,type:'Учебный квартал',weight:1.2},
+    {name:'Больница',x:7,y:4,type:'Городская больница',weight:1.4},
+    {name:'Заречье',x:10,y:4,type:'Новый жилой район',weight:1.3},
+    {name:'Северный',x:10,y:1,type:'Жилой район',weight:1},
+    {name:'Парк',x:10,y:7,type:'Отдых и прогулки',weight:.8},
+    {name:'Набережная',x:7,y:10,type:'Деловой квартал',weight:1.1},
+    {name:'Южный',x:4,y:10,type:'Жилой район',weight:1.1}
+  ];
+  var COLORS=['#32946d','#df9b56','#6f88b6','#b77da3','#7e9954','#58a6ae'];
+  function clamp(x,a,b){return Math.max(a,Math.min(b,x));}
+  function random(s){s.seed=(s.seed*1664525+1013904223)>>>0;return s.seed/4294967296;}
+  function log(s,message){s.journal.unshift({tick:s.tick,text:message});s.journal=s.journal.slice(0,60);}
+  function create(){
+    var s={version:1,seed:412781,tick:0,money:85000,population:5000,happiness:68,trust:65,ecology:78,fare:35,
+      routes:[{id:1,name:'Вокзальный',stops:[0,1,2,3],color:COLORS[0],served:0}],
+      vehicles:[{id:1,route:1,leg:0,progress:0,direction:1,passengers:[],wear:0},{id:2,route:null,leg:0,progress:0,direction:1,passengers:[],wear:0}],
+      queues:[],served:0,earned:0,spent:0,history:[],nextRoute:2,nextVehicle:3,mission:0,choice:null,storyPending:false,
+      introSeen:false,loan:false,ended:false,won:false,event:null,notifications:[],journal:[],lastGrowth:0,missionsPaid:[]};
+    for(var i=0;i<STOPS.length;i++){
+      s.queues.push([]);
+      for(var j=0;j<5+i%4;j++){var dest=Math.floor(random(s)*STOPS.length);if(dest!==i)s.queues[i].push({dest:dest,wait:0});}
+    }
+    log(s,'Вы назначены начальником транспорта. Две маршрутки, старый гараж и целый город впереди.');
+    return s;
+  }
+  function coverage(s){var a={};s.routes.forEach(function(r){if(s.vehicles.some(function(v){return v.route===r.id;}))r.stops.forEach(function(id){a[id]=true;});});return Object.keys(a).length;}
+  function routeLength(r){var total=0;for(var i=1;i<r.stops.length;i++){var a=STOPS[r.stops[i-1]],b=STOPS[r.stops[i]];total+=Math.abs(a.x-b.x)+Math.abs(a.y-b.y);}return total;}
+  function notify(s,message){s.notifications.push(message);log(s,message);}
+  function income(s,value){s.money+=value;s.earned+=value;}
+  function expense(s,value){s.money-=value;s.spent+=value;}
+  function cost(ids){return 3000+ids.length*500;}
+  function build(s,ids){
+    if(s.ended)return {ok:false,error:'Начните новую игру.'};
+    if(ids.length<2 || ids.length>12 || ids.some(function(n,i){return typeof n!=='number'||n%1!==0||!STOPS[n]||ids.indexOf(n)!==i;}))return {ok:false,error:'Выберите от 2 до 12 разных остановок.'};
+    if(s.routes.length>=6)return {ok:false,error:'В прототипе доступно до 6 маршрутов.'};
+    var free=s.vehicles.filter(function(v){return v.route===null;})[0];
+    var price=cost(ids)+(free?0:18000);
+    if(s.money<price)return {ok:false,error:'Нужно '+price+' ₽. Накопите бюджет или возьмите городской кредит.'};
+    var id=s.nextRoute++;var r={id:id,name:STOPS[ids[0]].name+' — '+STOPS[ids[ids.length-1]].name,stops:ids.slice(),color:COLORS[(id-1)%COLORS.length],served:0};
+    if(!free){free={id:s.nextVehicle++,route:null,leg:0,progress:0,direction:1,passengers:[],wear:0};s.vehicles.push(free);}
+    free.route=id;free.leg=0;free.progress=0;free.direction=1;s.routes.push(r);expense(s,price);
+    log(s,'Открыт маршрут №'+id+': '+r.name+'. Затраты '+price+' ₽.');checkMissions(s);
+    return {ok:true,price:price,id:id};
+  }
+  function buy(s){
+    if(s.ended)return {ok:false,error:'Игра завершена.'};
+    if(s.money<18000)return {ok:false,error:'Маршрутка стоит 18 000 ₽.'};
+    if(s.vehicles.length>=20)return {ok:false,error:'В гараже нет места: максимум 20 машин.'};
+    expense(s,18000);s.vehicles.push({id:s.nextVehicle++,route:null,leg:0,progress:0,direction:1,passengers:[],wear:0});log(s,'Куплена маршрутка за 18 000 ₽. Назначьте её на линию.');return {ok:true};
+  }
+  function unload(s,v){
+    var r=s.routes.filter(function(r){return r.id===v.route;})[0];
+    var stop=r?r.stops[v.leg]:0;
+    v.passengers.forEach(function(p){s.queues[stop].push({dest:p.dest,wait:0});});v.passengers=[];
+  }
+  function assign(s,vid,rid){
+    var v=s.vehicles.filter(function(v){return v.id===vid;})[0];
+    var r=s.routes.filter(function(r){return r.id===rid;})[0];
+    if(!v || (rid!==null&&!r))return {ok:false,error:'Маршрут не найден.'};
+    if(v.route===rid)return {ok:true};
+    unload(s,v);v.route=rid;v.leg=0;v.progress=0;v.direction=1;return {ok:true};
+  }
+  function closeRoute(s,id){
+    var r=s.routes.filter(function(r){return r.id===id;})[0];
+    if(!r)return {ok:false,error:'Маршрут не найден.'};
+    if(s.choice==='deal' && r.stops.indexOf(7)>=0 && s.routes.filter(function(x){return x.stops.indexOf(7)>=0;}).length===1)return {ok:false,error:'Договор с Грачом требует сохранять маршрут в Заречье.'};
+    s.vehicles.forEach(function(v){if(v.route===id)assign(s,v.id,null);});s.routes=s.routes.filter(function(r){return r.id!==id;});s.trust=Math.max(0,s.trust-3);log(s,'Маршрут №'+id+' закрыт. Транспорт переведён в резерв.');return {ok:true};
+  }
+  function repair(s,vid){var v=s.vehicles.filter(function(v){return v.id===vid;})[0];if(!v)return {ok:false,error:'Машина не найдена.'};if(s.money<1500)return {ok:false,error:'Ремонт стоит 1 500 ₽.'};expense(s,1500);v.wear=0;return {ok:true};}
+  function takeLoan(s){if(s.loan)return {ok:false,error:'Городской кредит уже выдан.'};s.loan=true;income(s,25000);log(s,'Получен городской кредит: 25 000 ₽. Обслуживание: 300 ₽ в час.');return {ok:true};}
+  function repay(s){if(!s.loan)return {ok:false,error:'Нет действующего кредита.'};if(s.money<25000)return {ok:false,error:'Для погашения нужно 25 000 ₽.'};expense(s,25000);s.loan=false;log(s,'Городской кредит полностью погашен.');return {ok:true};}
+  function choice(s,value){
+    if(s.choice || !s.storyPending || ['deal','public'].indexOf(value)<0)return {ok:false,error:'Это решение сейчас недоступно.'};
+    if(value==='deal'){
+      var r=s.routes.filter(function(r){return r.stops.indexOf(7)>=0;})[0];
+      if(!r){return {ok:false,error:'Сначала соедините Заречье с городом: этого требует инвестор.'};}
+      income(s,30000);s.trust=clamp(s.trust-6,0,100);s.happiness=clamp(s.happiness-4,0,100);notify(s,'Вы приняли предложение Грача. +30 000 ₽, субсидия 200 ₽/час; маршрут в Заречье защищён договором.');
+    }else{s.trust=clamp(s.trust+8,0,100);s.happiness=clamp(s.happiness+5,0,100);notify(s,'Вы отказали Грачу. Доверие мэра +8, довольство +5. Горожане ценят независимость.');}
+    s.choice=value;s.storyPending=false;return {ok:true};
+  }
+  function checkMissions(s){
+    if(s.mission===0&&s.routes.some(function(r){return r.stops.indexOf(6)>=0&&s.vehicles.some(function(v){return v.route===r.id;});})){
+      s.mission=1;income(s,8000);s.missionsPaid.push(0);notify(s,'Больница подключена! Город выделил 8 000 ₽ на развитие.');
+    }
+    if(s.mission===1&&s.served>=100){s.mission=2;income(s,10000);s.trust=clamp(s.trust+7,0,100);s.missionsPaid.push(1);notify(s,'100 пассажиров доставлены! Награда 10 000 ₽, доверие +7.');}
+    if(s.mission===2&&s.population>=6000&&s.served>=300&&s.choice){s.mission=3;s.won=true;income(s,15000);s.missionsPaid.push(2);notify(s,'Первая глава завершена! Верхнереченск вырос до 6 000 жителей. Награда 15 000 ₽.');}
+  }
+  function arrive(s,v,r){
+    var stop=r.stops[v.leg];var remaining=[];
+    v.passengers.forEach(function(p){if(p.dest===stop){s.served++;r.served++;}else remaining.push(p);});v.passengers=remaining;
+    var queue=s.queues[stop],next=[];
+    queue.forEach(function(p){if(v.passengers.length<12&&r.stops.indexOf(p.dest)>=0){v.passengers.push(p);income(s,s.fare);}else next.push(p);});s.queues[stop]=next;
+  }
+  function tick(s){
+    if(s.ended)return;
+    var before=s.money;s.tick++;
+    var hour=(8+Math.floor(s.tick/12))%24;var peak=(hour>=7&&hour<=10)||(hour>=17&&hour<=20);
+    var demand=(peak?1:.5)*s.population/5000*clamp(1.6-s.fare/60,.2,1.6);
+    for(var i=0;i<STOPS.length;i++){
+      var queue=s.queues[i];
+      s.queues[i]=queue.filter(function(p){p.wait++;return p.wait<60;});
+      var rate=demand*STOPS[i].weight*(s.event&&s.event.kind==='fair'&&i===3?2.6:1);
+      if(random(s)<rate*.43 && s.queues[i].length<55){var dest=Math.floor(random(s)*STOPS.length);if(dest!==i)s.queues[i].push({dest:dest,wait:0});}
+    }
+    s.vehicles.forEach(function(v){
+      if(v.route===null)return;
+      var r=s.routes.filter(function(r){return r.id===v.route;})[0];if(!r){v.route=null;return;}
+      if(v.progress===0)arrive(s,v,r);
+      if(v.leg===r.stops.length-1)v.direction=-1;if(v.leg===0)v.direction=1;
+      var a=STOPS[r.stops[v.leg]],b=STOPS[r.stops[v.leg+v.direction]];
+      var len=Math.abs(a.x-b.x)+Math.abs(a.y-b.y);
+      var speed=(s.event&&s.event.kind==='snow'?.65:1)*(v.wear>80?.6:1);
+      v.progress+=.9*speed/len;
+      if(v.progress>=1){v.leg+=v.direction;v.progress=0;}
+      v.wear=clamp(v.wear+.018,0,100);
+    });
+    if(s.tick%12===0){
+      var active=s.vehicles.filter(function(v){return v.route!==null;}).length;
+      var costs=active*210+(s.vehicles.length-active)*35+(s.loan?300:0);
+      expense(s,costs);income(s,coverage(s)*45+(s.choice==='deal'?200:0));
+      var waiting=s.queues.reduce(function(t,q){return t+q.length;},0);
+      var target=clamp(40+coverage(s)*3.5-(s.fare-30)*.45-waiting*.08,12,96);
+      s.happiness=clamp(s.happiness+(target-s.happiness)*.13,0,100);
+      s.trust=clamp(s.trust+(s.happiness>=55?.35:-.7)+(s.money<0?-2:0),0,100);
+      s.ecology=clamp(82-active*.8+coverage(s)*.4,0,100);
+    }
+    if(s.tick%24===0){var growth=Math.round(Math.max(-25,(coverage(s)-2)*7+s.happiness*.4-15));s.population=Math.max(2000,s.population+growth);s.lastGrowth=growth;}
+    if(s.tick===48){s.event={kind:'snow',until:72};notify(s,'Мокрый снег: скорость транспорта снижена на 35% на два игровых часа.');}
+    if(s.event&&s.tick>=s.event.until){s.event=null;notify(s,'Погода и спрос вернулись к обычному режиму.');}
+    if(s.tick===110){s.event={kind:'fair',until:146};notify(s,'Ярмарка на рынке! Спрос у остановки «Рынок» вырос на три часа.');}
+    if(!s.choice&&!s.storyPending&&s.served>=80){s.storyPending=true;notify(s,'Артём Грач предлагает сделку. Прочитайте письмо в разделе «История».');}
+    checkMissions(s);
+    s.history.push(s.money-before);if(s.history.length>12)s.history.shift();
+    if(s.money< -10000&&s.trust<20){s.ended=true;notify(s,'Бюджет и доверие исчерпаны. Мэр отправил вас в отставку.');}
+  }
+  function metrics(s){return {coverage:coverage(s),waiting:s.queues.reduce(function(t,q){return t+q.length;},0),onboard:s.vehicles.reduce(function(t,v){return t+v.passengers.length;},0),profit:Math.round(s.history.reduce(function(t,n){return t+n;},0)),active:s.vehicles.filter(function(v){return v.route!==null;}).length};}
+  function restore(raw){
+    try{
+      var s=JSON.parse(raw);
+      if(!s||s.version!==1||!Array.isArray(s.routes)||!Array.isArray(s.vehicles)||!Array.isArray(s.queues)||s.queues.length!==12||!Array.isArray(s.history)||!Array.isArray(s.journal)||!Array.isArray(s.notifications)||!Array.isArray(s.missionsPaid))return null;
+      var nums=['tick','money','population','happiness','trust','fare','seed','served','nextRoute','nextVehicle','mission','earned','spent'];
+      if(nums.some(function(k){return typeof s[k]!=='number'||!isFinite(s[k]);}))return null;
+      if(s.tick<0||s.mission<0||s.mission>3||s.fare<15||s.fare>65||s.routes.length>6||s.vehicles.length>20)return null;
+      var routeIds={};var valid=true;
+      s.routes.forEach(function(r){if(!r||!Array.isArray(r.stops)||r.stops.length<2||r.stops.length>12||typeof r.id!=='number'||routeIds[r.id]||r.stops.some(function(id,i){return !STOPS[id]||id%1!==0||r.stops.indexOf(id)!==i;}))valid=false;routeIds[r.id]=r;});
+      s.vehicles.forEach(function(v){var r=routeIds[v.route];if(!v||!Array.isArray(v.passengers)||v.passengers.length>12||typeof v.wear!=='number'||!isFinite(v.wear)||typeof v.progress!=='number'||v.progress<0||v.progress>=1||!isFinite(v.progress)|| (v.route!==null&&(!r||v.leg<0||v.leg>=r.stops.length||v.leg%1!==0))||[1,-1].indexOf(v.direction)<0)valid=false;});
+      s.queues.forEach(function(q){if(!Array.isArray(q)||q.length>1000)valid=false;else q.forEach(function(p){if(!p||!STOPS[p.dest]||p.dest%1!==0||typeof p.wait!=='number'||!isFinite(p.wait))valid=false;});});
+      s.vehicles.forEach(function(v){v.passengers.forEach(function(p){if(!p||!STOPS[p.dest]||p.dest%1!==0)valid=false;});});
+      return valid?s:null;
+    }catch(e){return null;}
+  }
+  root.CityGame={STOPS:STOPS,COLORS:COLORS,create:create,tick:tick,build:build,buy:buy,assign:assign,closeRoute:closeRoute,repair:repair,takeLoan:takeLoan,repay:repay,choice:choice,metrics:metrics,cost:cost,routeLength:routeLength,restore:restore};
+})(typeof window!=='undefined'?window:this);
+
+</script>
+  <script>
+(function () {
+  'use strict';
+  const G=window.CityGame, $=id=>document.getElementById(id), KEY='city-route-save-v1';
+  let state,storageOK=true;
+  try { state=G.restore(localStorage.getItem(KEY)); } catch(e){storageOK=false;}
+  state=state||G.create();
+  let speed=1,paused=false,building=false,draft=[],selectedStop=null,heat=false,zoom=1,pan={x:0,y:0};
+  let width=800,height=580,unit=32,acc=0,last=0,saveElapsed=0,toastTimer,renderClock=0,currentPanel=null,modalReturn=null;
+  const canvas=$('city'),ctx=canvas.getContext('2d');
+  const fmt=n=>Math.round(n).toLocaleString('ru-RU'), rub=n=>fmt(n)+' ₽';
+  const escape=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  function toast(t){$('toast').textContent=t;$('toast').classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>$('toast').classList.remove('show'),4500);}
+  function save(){try{localStorage.setItem(KEY,JSON.stringify(state));storageOK=true;$('save-status').textContent='Прогресс сохранён на устройстве';}catch(e){storageOK=false;$('save-status').textContent='Сохранение недоступно в этом браузере';}}
+  function apply(result,message){if(!result.ok){toast(result.error);return false;}if(message)toast(message);save();renderUI();return true;}
+  function date(t){const m=480+t*5;return (1+Math.floor(m/1440))+' мая · '+String(Math.floor(m/60)%24).padStart(2,'0')+':'+String(m%60).padStart(2,'0');}
+  function showModal(content,panel){
+    currentPanel=panel||null;modalReturn=document.activeElement;
+    $('modal-content').innerHTML=content;
+    document.querySelectorAll('.nav').forEach(n=>n.classList.toggle('active',n.dataset.panel===(panel||'map')));
+    if(!$('modal').open)$('modal').showModal();
+  }
+  function modalTop(label,title){return '<div class="dialog-top"><span class="eyebrow">'+label+'</span><button class="dialog-close" data-action="close" aria-label="Закрыть">×</button></div><h2>'+title+'</h2>';}
+  function closeModal(){$('modal').close();currentPanel=null;document.querySelectorAll('.nav').forEach(n=>n.classList.toggle('active',n.dataset.panel==='map'));if(modalReturn&&modalReturn.isConnected)modalReturn.focus();}
+  $('modal').addEventListener('close',()=>{currentPanel=null;acc=0;document.querySelectorAll('.nav').forEach(n=>n.classList.toggle('active',n.dataset.panel==='map'));});
+  $('modal').addEventListener('click',e=>{if(e.target===$('modal')){const r=$('modal').getBoundingClientRect();if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom)closeModal();}});
+  function help(first){
+    showModal(modalTop(first?'ДОБРО ПОЖАЛОВАТЬ · ГЛАВА 01':'ПАМЯТКА НАЧАЛЬНИКА',first?'Город ждёт вас.':'Как устроен маршрут')+
+      '<div class="intro-mark">↗</div><p>Верхнереченск. Пять тысяч жителей, две маршрутки и старый гараж. В папке предшественника записка: «Проверь, кто владеет землёй у вокзала».</p>'+
+      '<div class="help-step"><b>1</b><span>Нажмите «Создать маршрут» и выберите на карте две или больше остановок. Линия автоматически проходит по улицам.</span></div>'+
+      '<div class="help-step"><b>2</b><span>Свяжите <b>больницу</b> с другими районами. Одна машина уже работает, вторая ждёт в резерве. Новый маршрут стоит от 4 000 ₽.</span></div>'+
+      '<div class="help-step"><b>3</b><span>Смотрите спрос, добавляйте машины и регулируйте тариф. Пассажиры едут к своей остановке без пересадок. Оплата — при посадке, награды — за доставку.</span></div>'+
+      '<p>Перетаскивайте карту, приближайте колёсиком или двумя пальцами. Нажмите остановку для справки. Пауза — кнопка Ⅱ или пробел. В окнах управления время останавливается.</p>'+
+      '<div class="dialog-actions"><button class="primary" data-action="start">'+(first?'Принять город':'Вернуться к городу')+' ↗</button></div>');
+  }
+  function renderUI(){
+    const m=G.metrics(state);
+    $('money').textContent=rub(state.money);$('money').style.color=state.money<0?'#b45544':'';
+    $('population').textContent=fmt(state.population);$('happiness').innerHTML=Math.round(state.happiness)+'<span>%</span>';$('trust').innerHTML=Math.round(state.trust)+'<span>%</span>';
+    $('profit').textContent=(m.profit>=0?'+':'')+rub(m.profit)+' за последний час';$('profit').style.color=m.profit<0?'#b68a65':'';
+    $('growth').textContent=state.lastGrowth?(state.lastGrowth>0?'+':'')+state.lastGrowth+' жителей / 2 часа':'Рост зависит от транспорта';
+    $('mood').textContent=state.happiness>75?'Жители довольны':state.happiness>50?'Есть куда расти':'Жители ждут перемен';
+    $('trust-label').textContent=state.trust>75?'Мэр на вашей стороне':state.trust>40?'Кредит доверия':'Риск отставки';
+    $('date').textContent=date(state.tick);$('weather').textContent=state.event&&state.event.kind==='snow'?'❄ +1° · Мокрый снег':state.event&&state.event.kind==='fair'?'☀ +18° · Ярмарка':'☀ +18° · Весна';
+    $('route-count').textContent=state.routes.length;
+    $('routes').innerHTML=state.routes.length?state.routes.map(r=>{
+      const n=state.vehicles.filter(v=>v.route===r.id).length;
+      return '<button class="route-item" data-route="'+r.id+'" style="--route:'+r.color+'"><span class="route-top"><span class="route-name"><i class="route-badge">'+String(r.id).padStart(2,'0')+'</i>'+escape(r.id===1?'Вокзальный':'Маршрут №'+r.id)+'</span><span class="route-status">'+(n?'На линии':'Нет машин')+'</span></span><span class="route-description">'+escape(G.STOPS[r.stops[0]].name)+' → '+escape(G.STOPS[r.stops[r.stops.length-1]].name)+'</span><span class="route-meta"><span>'+n+' машин · '+r.stops.length+' остановки</span><span>'+fmt(r.served)+' перевезено ↗</span></span></button>';
+    }).join(''):'<p class="empty">Пока нет маршрутов. Соедините город первой линией.</p>';
+    $('fleet-summary').textContent=state.vehicles.length+' машины · '+(state.vehicles.length-m.active)+' в резерве';
+    $('map-mode').textContent=building?'Прокладываем маршрут':paused?'Город на паузе':state.event&&state.event.kind==='snow'?'В городе снег':heat?'Где ждут пассажиры':'Город живёт';
+    $('map-subtitle').textContent=heat?m.waiting+' ждут · '+m.onboard+' в пути':m.coverage+' из 12 остановок подключено';
+    $('pause').textContent=paused?'▶':'Ⅱ';$('pause').setAttribute('aria-label',paused?'Продолжить игру':'Приостановить игру');$('pause').classList.toggle('selected',paused);
+    document.querySelectorAll('[data-speed]').forEach(b=>b.classList.toggle('selected',+b.dataset.speed===speed&&!paused));
+    const missions=[['Ближе к людям','Жителям нужен транспорт до больницы. Соедините её хотя бы с одной остановкой.','Больница на действующей линии','+8 000 ₽',0],['Город в движении','Доставьте 100 пассажиров к их остановкам. Чем больше районов связано, тем полезнее сеть.',fmt(state.served)+' / 100 пассажиров','+10 000 ₽',state.served/100],['Новые горизонты','Вырастите город до 6 000 жителей, доставьте 300 пассажиров и ответьте на письмо Грача.',fmt(state.population)+' / 6 000 · '+Math.min(300,state.served)+'/300','+15 000 ₽',Math.min((state.population-5000)/1000,state.served/300,state.choice?1:.85)],['Город для будущего','Первая глава пройдена. Развивайте сеть дальше в свободном режиме.','Свободная игра','Глава пройдена',1]];
+    const q=missions[state.mission];$('mission-title').textContent=q[0];$('mission-text').textContent=q[1];$('mission-detail').textContent=q[2];$('mission-reward').textContent=q[3];$('mission-progress').style.width=Math.max(0,Math.min(1,q[4]))*100+'%';$('mission-index').textContent=String(Math.min(state.mission+1,3)).padStart(2,'0')+' / 03';
+    $('advisor-text').textContent=building?'«Короткие линии ходят чаще. Соединяйте районы с работой, рынком и больницей».':state.storyPending?'«Грач прислал письмо. Загляните в историю, начальник. Решение за вами».':m.waiting>180?'«Очереди растут. Нужны новые маршруты или ещё машины на загруженных линиях».':state.mission===0?'«До больницы люди добираются пешком. Добавим маршрут, начальник?»':'«Хороший транспорт меняет город. Главное — не забывать, для кого мы работаем». '; 
+    document.querySelector('.nav-dot').style.display=state.storyPending?'inline-block':'none';
+    if(selectedStop!==null&&!building)renderStop();
+    if(!storageOK)$('save-status').textContent='Сохранение недоступно в этом браузере';
+  }
+  function fleet(){
+    let html=modalTop('ТРАНСПОРТНОЕ УПРАВЛЕНИЕ','Ваш автопарк')+'<p>Маршрутка · 12 мест · 210 ₽/час на линии. В резерве — 35 ₽/час. Износ выше 80% снижает скорость.</p><div class="dialog-list">';
+    state.vehicles.forEach(v=>{
+      html+='<div class="dialog-row"><div><b>Маршрутка №'+v.id+'</b><small>'+v.passengers.length+'/12 мест · Износ '+Math.round(v.wear)+'%</small></div><div><select class="route-select" aria-label="Маршрут машины '+v.id+'" data-vehicle="'+v.id+'"><option value=""'+(v.route===null?' selected':'')+'>В резерве</option>'+state.routes.map(r=>'<option value="'+r.id+'"'+(v.route===r.id?' selected':'')+'>Маршрут №'+r.id+'</option>').join('')+'</select>'+(v.wear>=15?'<button class="secondary" style="margin-top:7px" data-repair="'+v.id+'">Ремонт · 1 500 ₽</button>':'')+'</div></div>';
+    });
+    html+='</div><div class="dialog-actions"><button class="primary" data-action="buy">＋ Купить · 18 000 ₽</button><button class="secondary" data-action="close">На карту</button></div>';showModal(html,'fleet');
+  }
+  function finance(){
+    const m=G.metrics(state);const active=m.active,reserve=state.vehicles.length-active;
+    showModal(modalTop('ЭКОНОМИКА ГОРОДА','Финансы')+'<div class="dialog-balance">'+rub(state.money)+'</div><div class="dialog-list"><div class="dialog-row"><span>Билеты, субсидии и награды<small>За всю игру, включая кредиты</small></span><strong>+'+rub(state.earned)+'</strong></div><div class="dialog-row"><span>Строительство, парк и расходы<small>За всю игру</small></span><strong>−'+rub(state.spent)+'</strong></div><div class="dialog-row"><span>Расходы на парк / час<small>'+active+' на линии · '+reserve+' в резерве</small></span><strong>'+rub(active*210+reserve*35)+'</strong></div><div class="dialog-row"><span>Субсидия / час<small>45 ₽ за каждую подключённую остановку</small></span><strong>+'+rub(m.coverage*45+(state.choice==='deal'?200:0))+'</strong></div><div class="dialog-row"><span>Баланс за последний час</span><strong>'+(m.profit>=0?'+':'')+rub(m.profit)+'</strong></div></div><h3>Стоимость проезда</h3><p>Высокий тариф снижает спрос и довольство. Рабочий диапазон: 25–40 ₽.</p><div class="dialog-fare"><button class="secondary" data-fare="-5">−</button><strong>'+state.fare+' ₽</strong><button class="secondary" data-fare="5">＋</button></div><h3>Городской кредит</h3><p>'+(state.loan?'Долг: 25 000 ₽. Обслуживание: 300 ₽ в час. Погасите долг, чтобы остановить списания.':'Можно получить 25 000 ₽. Обслуживание — 300 ₽ в час, до погашения основной суммы.')+'</p><div class="dialog-actions"><button class="secondary" data-action="'+(state.loan?'repay':'loan')+'">'+(state.loan?'Погасить · 25 000 ₽':'Взять 25 000 ₽')+'</button><button class="primary" data-action="close">Вернуться</button></div>','finance');
+  }
+  function journal(){
+    let html=modalTop('ЛЮДИ И РЕШЕНИЯ','История города');
+    if(state.storyPending){html+='<h3>Предложение Артёма Грача</h3><p>«Заречье — будущее города. Я дам тридцать тысяч и буду доплачивать за перевозки. Условие простое: маршрут через мои участки остаётся навсегда».</p><p>Степан Ильич хмурится: «В папке Корнеева тоже были эти участки…»</p><button class="choice" data-choice="deal"><b>Принять инвестиции</b><small>+30 000 ₽ и 200 ₽/час. Доверие −6, довольство −4. Нельзя закрыть последнюю линию в Заречье. Сначала проложите туда маршрут.</small></button><button class="choice" data-choice="public"><b>Сохранить независимость</b><small>Доверие +8, довольство +5. Развиваем город на собственные доходы.</small></button>';}
+    else if(state.choice)html+='<p>'+(state.choice==='deal'?'Вы приняли инвестиции Грача. Маршрут в Заречье защищён договором. Деньги помогли городу, но у этой помощи есть цена.':'Вы выбрали независимость транспортной системы. Вера Лунина готовит материал о земле у вокзала.')+'</p>';
+    else html+='<p>Павел Корнеев, ваш предшественник, исчез. В папке остались две заметки: «Не соглашайся на метро до сороковых» и «Проверь, кто владеет землёй у вокзала».</p><p>Развивайте сеть. После 80 доставленных пассажиров вас найдёт первый инвестор.</p>';
+    html+='<h3>Журнал событий</h3>'+state.journal.slice(0,20).map(e=>'<div class="journal-entry"><time>'+date(e.tick)+'</time>'+escape(e.text)+'</div>').join('');showModal(html,'journal');
+  }
+  function routeDetails(id){
+    const r=state.routes.find(r=>r.id===id);if(!r)return;
+    const vehicles=state.vehicles.filter(v=>v.route===id),free=state.vehicles.filter(v=>v.route===null);
+    showModal(modalTop('МАРШРУТ №'+r.id,escape(r.name))+'<p>'+r.stops.map(i=>escape(G.STOPS[i].name)).join(' → ')+'</p><div class="dialog-list"><div class="dialog-row"><span>Доставлено пассажиров</span><strong>'+r.served+'</strong></div><div class="dialog-row"><span>Машин на линии</span><strong>'+vehicles.length+'</strong></div><div class="dialog-row"><span>Мест в транспорте</span><strong>'+vehicles.length*12+'</strong></div><div class="dialog-row"><span>Время до конца линии<small>При обычной погоде, без износа</small></span><strong>~'+Math.ceil(G.routeLength(r)/.9)*5+' мин</strong></div></div><p>Машины ходят в обе стороны. Пассажиры выбирают линию, на которой есть нужная им остановка.</p><div class="dialog-actions">'+(free.length?'<button class="primary" data-add-vehicle="'+id+'">＋ Машину из резерва</button>':'<button class="primary" data-action="fleet">Купить транспорт</button>')+'<button class="secondary danger" data-close-route="'+id+'">Закрыть маршрут</button></div>');
+  }
+  function renderStop(){
+    if(selectedStop===null)return;
+    const stop=G.STOPS[selectedStop],lines=state.routes.filter(r=>r.stops.includes(selectedStop));
+    $('stop-card').hidden=false;$('stop-card').innerHTML='<button class="close-stop" data-action="close-stop" aria-label="Закрыть">×</button><span class="eyebrow">ОСТАНОВКА</span><h3>'+escape(stop.name)+'</h3><p>'+stop.type+'<br><b>'+state.queues[selectedStop].length+' пассажиров</b> ждут транспорт</p><div class="stop-lines">'+(lines.length?lines.map(r=>'<span class="stop-chip" style="color:'+r.color+'">№ '+r.id+'</span>').join(''):'<span class="stop-chip">Нет маршрутов</span>')+'</div><button class="secondary" data-action="from-stop">Начать маршрут отсюда ↗</button>';
+  }
+  function startBuild(from){
+    if(state.ended){toast('Игра завершена. Начните заново.');return;}
+    if(state.routes.length>=6){toast('Доступно до 6 линий. Добавляйте машины на существующие маршруты.');return;}
+    building=true;draft=typeof from==='number'?[from]:[];selectedStop=null;$('stop-card').hidden=true;$('build-bar').hidden=false;canvas.classList.add('building');updateBuild();renderUI();
+  }
+  function updateBuild(){
+    $('build-title').textContent='Маршрут №'+state.nextRoute+' · '+draft.length+' остановки';
+    const free=state.vehicles.some(v=>v.route===null),price=G.cost(draft)+(free?0:18000);
+    $('build-description').textContent=draft.length<2?'Выберите '+(draft.length?'ещё одну остановку':'остановки на карте')+' · Esc — отмена':draft.map(i=>G.STOPS[i].name).join(' → ');
+    $('confirm-route').textContent='Открыть · '+rub(price);$('confirm-route').disabled=draft.length<2;
+    $('undo-stop').disabled=!draft.length;
+  }
+  function endBuild(){building=false;draft=[];$('build-bar').hidden=true;canvas.classList.remove('building');renderUI();}
+  $('new-route').onclick=()=>startBuild();$('cancel-route').onclick=endBuild;$('undo-stop').onclick=()=>{draft.pop();updateBuild();};
+  $('confirm-route').onclick=()=>{if(apply(G.build(state,draft),'Маршрут открыт. Машина выходит на линию!')){endBuild();drainNotifications();}};
+  $('pause').onclick=()=>{paused=!paused;acc=0;renderUI();};
+  document.querySelectorAll('[data-speed]').forEach(b=>b.onclick=()=>{speed=+b.dataset.speed;paused=false;renderUI();});
+  document.querySelectorAll('[data-panel]').forEach(b=>b.onclick=()=>{const p=b.dataset.panel;if(p==='map'){if($('modal').open)closeModal();return;}if(p==='fleet')fleet();if(p==='finance')finance();if(p==='journal')journal();});
+  $('help').onclick=()=>help(false);
+  $('settings').onclick=()=>showModal(modalTop('НОВОЕ НАЧАЛО','Начать заново?')+'<p>Текущий город будет заменён новой игрой. Снова две маршрутки, 85 000 ₽ и чистая история.</p><div class="dialog-actions"><button class="primary" data-action="restart">Начать новую игру</button><button class="secondary" data-action="close">Продолжить текущую</button></div>');
+  $('layers').onclick=()=>{heat=!heat;$('layers').classList.toggle('active',heat);$('layers').setAttribute('aria-pressed',String(heat));renderUI();};
+  $('zoom-in').onclick=()=>{zoom=Math.min(2.2,zoom*1.18);};$('zoom-out').onclick=()=>{zoom=Math.max(.65,zoom/1.18);};$('recenter').onclick=()=>{zoom=1;pan={x:0,y:0};};
+  document.addEventListener('keydown',e=>{if($('modal').open||/INPUT|SELECT|TEXTAREA|BUTTON/.test(e.target.tagName))return;if(e.code==='Space'){e.preventDefault();paused=!paused;acc=0;renderUI();}if(e.key==='Escape'){if(building)endBuild();selectedStop=null;$('stop-card').hidden=true;}});
+  document.addEventListener('click',e=>{
+    const b=e.target.closest('button');if(!b)return;
+    if(b.dataset.route){routeDetails(+b.dataset.route);return;}
+    if(b.dataset.choice){if(apply(G.choice(state,b.dataset.choice),'Решение принято. Оно останется в истории города.'))journal();return;}
+    if(b.dataset.repair){if(apply(G.repair(state,+b.dataset.repair),'Машина отремонтирована.'))fleet();return;}
+    if(b.dataset.fare){state.fare=Math.max(15,Math.min(65,state.fare+(+b.dataset.fare)));save();finance();return;}
+    if(b.dataset.addVehicle){const v=state.vehicles.find(v=>v.route===null);if(v){apply(G.assign(state,v.id,+b.dataset.addVehicle),'Машина назначена на линию.');routeDetails(+b.dataset.addVehicle);}return;}
+    if(b.dataset.closeRoute){const id=+b.dataset.closeRoute;showModal(modalTop('УПРАВЛЕНИЕ ЛИНИЕЙ','Закрыть маршрут №'+id+'?')+'<p>Машины вернутся в резерв, пассажиры — на ближайшую остановку маршрута. Доверие мэра снизится на 3. Затраты на открытие не возвращаются.</p><div class="dialog-actions"><button class="secondary danger" data-confirm-close="'+id+'">Закрыть линию</button><button class="primary" data-action="close">Оставить</button></div>');return;}
+    if(b.dataset.confirmClose){if(apply(G.closeRoute(state,+b.dataset.confirmClose),'Маршрут закрыт, машины в резерве.'))closeModal();return;}
+    const a=b.dataset.action;if(!a)return;
+    if(a==='close')closeModal();
+    if(a==='start'){state.introSeen=true;save();closeModal();}
+    if(a==='fleet')fleet();
+    if(a==='buy'){if(apply(G.buy(state),'Маршрутка куплена. Выберите для неё линию.'))fleet();}
+    if(a==='loan'){if(apply(G.takeLoan(state),'Кредит зачислен в бюджет.'))finance();}
+    if(a==='repay'){if(apply(G.repay(state),'Кредит погашен.'))finance();}
+    if(a==='close-stop'){selectedStop=null;$('stop-card').hidden=true;}
+    if(a==='from-stop')startBuild(selectedStop);
+    if(a==='restart'){state=G.create();endBuild();selectedStop=null;$('stop-card').hidden=true;paused=false;acc=0;zoom=1;pan={x:0,y:0};endedShown=false;wonShown=false;Object.keys(visualPositions).forEach(k=>delete visualPositions[k]);state.introSeen=true;save();closeModal();renderUI();toast('Верхнереченск снова ждёт ваших решений.');}
+  });
+  document.addEventListener('change',e=>{if(e.target.dataset.vehicle){apply(G.assign(state,+e.target.dataset.vehicle,e.target.value===''?null:+e.target.value),'Назначение сохранено.');}});
+  function drainNotifications(){if(state.notifications.length){toast(state.notifications.shift());save();}}
+  // Isometric map. Every route uses the same orthogonal street graph as its vehicles.
+  function project(x,y,z){return {x:width/2+(x-y)*unit+pan.x,y:height*.49+(x+y-11)*unit*.5-(z||0)*unit+pan.y};}
+  function polygon(points,fill,stroke){ctx.beginPath();points.forEach((p,i)=>{if(i)ctx.lineTo(p.x,p.y);else ctx.moveTo(p.x,p.y);});ctx.closePath();if(fill){ctx.fillStyle=fill;ctx.fill();}if(stroke){ctx.strokeStyle=stroke;ctx.lineWidth=.6;ctx.stroke();}}
+  function tile(x,y,w,d,color,z){polygon([project(x,y,z),project(x+w,y,z),project(x+w,y+d,z),project(x,y+d,z)],color);}
+  function box(x,y,w,d,h,colors,z){
+    const b=z||0;
+    polygon([project(x,y+d,b),project(x+w,y+d,b),project(x+w,y+d,b+h),project(x,y+d,b+h)],colors[1]);
+    polygon([project(x+w,y,b),project(x+w,y+d,b),project(x+w,y+d,b+h),project(x+w,y,b+h)],colors[2]);
+    tile(x,y,w,d,colors[0],b+h);
+  }
+  function lineWorld(points,color,lineWidth,dash){ctx.beginPath();points.forEach((p,i)=>{const q=project(p.x,p.y,p.z||0);if(i)ctx.lineTo(q.x,q.y);else ctx.moveTo(q.x,q.y);});ctx.strokeStyle=color;ctx.lineWidth=lineWidth;ctx.lineJoin='round';ctx.lineCap='round';ctx.setLineDash(dash||[]);ctx.stroke();ctx.setLineDash([]);}
+  function pathBetween(a,b){return [{x:a.x,y:a.y},{x:b.x,y:a.y},{x:b.x,y:b.y}];}
+  function routePath(ids){let points=[];for(let i=1;i<ids.length;i++)points=points.concat(pathBetween(G.STOPS[ids[i-1]],G.STOPS[ids[i]]));return points;}
+  let buildings=[],trees=[];
+  function rng(n){let seed=n;return ()=>{seed=(seed*1664525+1013904223)>>>0;return seed/4294967296;};}
+  function makeCity(){
+    const r=rng(297);const shades=[['#e8e4d0','#c5cbb7','#a7b5a0'],['#ede7d5','#d6cdb8','#b6bca7'],['#dce5d2','#bccdb5','#9fb69e'],['#dedbd0','#c2c2b2','#a3afa0']];
+    for(let x=0;x<12;x++)for(let y=0;y<12;y++){
+      if([1,4,7,10].includes(x)||[1,4,7,10].includes(y)||x===8)continue;
+      if(x>=9&&y>=8){if(r()>.25)trees.push({x:x+.2+r()*.5,y:y+.2+r()*.5,h:.45+r()*.5});continue;}
+      if(r()<.18){trees.push({x:x+.4,y:y+.4,h:.4+r()*.6});continue;}
+      const h=.45+r()*1.5;buildings.push({x:x-.33+r()*.1,y:y-.32+r()*.1,w:.55+r()*.23,d:.5+r()*.25,h:h,colors:shades[Math.floor(r()*shades.length)],special:x===6&&y===3?'hospital':x===3&&y===3?'market':x===0&&y===9?'station':x===6&&y===0?'university':null});
+    }
+    for(let i=0;i<20;i++){const x=r()*11.5,y=r()*11.5;if([1,4,7,10].every(n=>Math.abs(x-n)>.6&&Math.abs(y-n)>.6)&&!(x>7.7&&x<9.2))trees.push({x:x,y:y,h:.35+r()*.55});}
+    buildings.sort((a,b)=>(a.x+a.y)-(b.x+b.y));
+  }
+  makeCity();
+  function drawTree(t){const p=project(t.x,t.y);ctx.fillStyle='#a1b58c45';ctx.beginPath();ctx.ellipse(p.x+unit*.15,p.y+unit*.08,unit*.25,unit*.12,0,0,Math.PI*2);ctx.fill();box(t.x-.025,t.y-.025,.05,.05,t.h*.55,['#8b9373','#969875','#7f8a66']);const top=project(t.x,t.y,t.h),left=project(t.x-.24,t.y,t.h*.35),right=project(t.x+.24,t.y,t.h*.35),front=project(t.x,t.y+.25,t.h*.35),back=project(t.x,t.y-.24,t.h*.35);polygon([top,left,front],'#95b57b');polygon([top,front,right],'#739b62');polygon([top,right,back],'#86aa70');}
+  function drawBuilding(b){
+    const h=b.h+(state.population>5500&&b.x<6?.2:0);
+    tile(b.x+.15,b.y+.15,b.w+.25,b.d+.22,'#899c7720');
+    if(b.special==='market'){
+      box(b.x,b.y,b.w,b.d,.3,['#d9c7a9','#c6b99e','#a6ab91']);
+      for(let j=0;j<4;j++)tile(b.x+j*b.w/4,b.y,b.w/4,b.d,j%2?'#e4c3a0':'#a8b88b',.4);
+      return;
+    }
+    box(b.x,b.y,b.w,b.d,h,b.colors);
+    const floors=Math.floor(h/.35);
+    for(let floor=0;floor<floors;floor++){
+      const z=.18+floor*.34;
+      for(let col=0;col<2;col++){
+        const x=b.x+.09+col*b.w*.45;
+        polygon([project(x,b.y+b.d+.002,z),project(x+.12,b.y+b.d+.002,z),project(x+.12,b.y+b.d+.002,z+.14),project(x,b.y+b.d+.002,z+.14)],'#9aa99a');
+        const y=b.y+.1+col*b.d*.44;
+        polygon([project(b.x+b.w+.002,y,z),project(b.x+b.w+.002,y+.1,z),project(b.x+b.w+.002,y+.1,z+.14),project(b.x+b.w+.002,y,z+.14)],'#849a8d');
+      }
+    }
+    if(b.special==='hospital'){
+      tile(b.x+b.w*.4,b.y+.08,.14,b.d-.16,'#db9276',h+.01);tile(b.x+.08,b.y+b.d*.4,b.w-.16,.14,'#db9276',h+.012);
+    }else if(b.special==='station')box(b.x+.12,b.y+.1,b.w-.24,b.d-.2,.18,['#9aa991','#a1b098','#839e8c'],h);
+    else if(b.special==='university')box(b.x+.2,b.y+.15,.2,.2,.2,['#e6dfc9','#b6c0a8','#a2b39b'],h);
+    else if(h>1.3)box(b.x+.12,b.y+.12,.17,.17,.12,['#d0d4c2','#b8c2ab','#9dad97'],h);
+  }
+  function rounded(x,y,w,h,r,color){ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.fillStyle=color;ctx.fill();}
+  function label(text,x,y,color,fill,size){ctx.font='600 '+(size||9)+'px Manrope, sans-serif';const w=ctx.measureText(text).width+14;rounded(x-w/2,y-10,w,18,5,fill||'#f8faf0ed');ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillStyle=color||'#6f8164';ctx.fillText(text,x,y-1);}
+  function drawStops(){
+    G.STOPS.forEach((s,i)=>{
+      const p=project(s.x,s.y,.05),q=state.queues[i].length;
+      const line=state.routes.find(r=>r.stops.includes(i));const chosen=draft.includes(i),active=chosen||i===selectedStop;
+      if(heat){const radius=Math.max(14,q*1.1)*Math.min(1.5,zoom);const grad=ctx.createRadialGradient(p.x,p.y,2,p.x,p.y,radius);grad.addColorStop(0,q>15?'#df9b5688':'#86b97766');grad.addColorStop(1,'#df9b5600');ctx.fillStyle=grad;ctx.beginPath();ctx.arc(p.x,p.y,radius,0,Math.PI*2);ctx.fill();}
+      if(building&&!chosen){ctx.strokeStyle='#a0b38a80';ctx.lineWidth=1;ctx.beginPath();ctx.arc(p.x,p.y,12+Math.sin(renderClock*2+i)*2,0,Math.PI*2);ctx.stroke();}
+      ctx.shadowColor='#29463320';ctx.shadowBlur=6;ctx.shadowOffsetY=2;ctx.beginPath();ctx.arc(p.x,p.y,active?7:5,0,Math.PI*2);ctx.fillStyle='#fffef4';ctx.fill();ctx.shadowBlur=0;ctx.shadowOffsetY=0;ctx.strokeStyle=chosen?G.COLORS[(state.nextRoute-1)%6]:line?line.color:'#a7b496';ctx.lineWidth=2.3;ctx.stroke();
+      if(chosen){ctx.fillStyle=G.COLORS[(state.nextRoute-1)%6];ctx.beginPath();ctx.arc(p.x,p.y,3,0,Math.PI*2);ctx.fill();}
+      const small=width<520;const text=(heat?q+' · ':'')+s.name;
+      label(text,p.x,p.y-18,active?'#28694d':line?'#60795d':'#8c9b7d',active?'#f9ffed':'#f6f9eeeb',small?8:9);
+      if(q>0&&!heat){ctx.fillStyle=q>18?'#d89b6c':'#a4b28b';const dots=Math.min(5,Math.ceil(q/5));for(let j=0;j<dots;j++){ctx.beginPath();ctx.arc(p.x-((dots-1)*4)/2+j*4,p.y+11,1.4,0,Math.PI*2);ctx.fill();}}
+    });
+  }
+  const visualPositions={};
+  function vehiclePosition(v){
+    const r=state.routes.find(r=>r.id===v.route);if(!r)return null;
+    let dir=v.direction;if(v.leg===r.stops.length-1)dir=-1;if(v.leg===0)dir=1;
+    const a=G.STOPS[r.stops[dir===1?v.leg:v.leg-1]],b=G.STOPS[r.stops[dir===1?v.leg+1:v.leg]],dx=b.x-a.x,dy=b.y-a.y,total=Math.abs(dx)+Math.abs(dy),distance=(dir===1?v.progress:1-v.progress)*total;
+    let x=a.x,y=a.y,angle=0;
+    if(distance<Math.abs(dx)){x+=Math.sign(dx)*distance;angle=dx>=0?0:Math.PI;}
+    else{x=b.x;y+=Math.sign(dy)*(distance-Math.abs(dx));angle=dy>=0?Math.PI/2:-Math.PI/2;}
+    return {x:x,y:y,color:r.color,angle:angle};
+  }
+  function drawVehicles(dt){
+    state.vehicles.forEach(v=>{
+      const pos=vehiclePosition(v);if(!pos){delete visualPositions[v.id];return;}
+      let visual=visualPositions[v.id];
+      if(!visual||visual.route!==v.route){visual={x:pos.x,y:pos.y,route:v.route};visualPositions[v.id]=visual;}
+      const follow=1-Math.exp(-dt*10);visual.x+=(pos.x-visual.x)*follow;visual.y+=(pos.y-visual.y)*follow;
+      const x=visual.x,y=visual.y,w=pos.angle===0||pos.angle===Math.PI?.36:.18,d=w===.36?.18:.36;
+      tile(x-w/2+.09,y-d/2+.09,w,d,'#305b3933',.02);
+      box(x-w/2,y-d/2,w,d,.16,['#fff5d6',pos.color,pos.color],.08);
+      tile(x-w*.25,y-d*.2,w*.5,d*.4,'#9fbdaf',.245);
+      const p=project(x,y,.44);if(zoom>1.4){ctx.fillStyle='#45684d';ctx.font='7px sans-serif';ctx.textAlign='center';ctx.fillText(v.passengers.length+'/12',p.x,p.y);}
+    });
+  }
+  function draw(dt){
+    unit=Math.min(width/25,height/16.5)*zoom;
+    ctx.clearRect(0,0,width,height);ctx.fillStyle='#e9eee0';ctx.fillRect(0,0,width,height);
+    const glow=ctx.createRadialGradient(width*.5,height*.45,10,width*.5,height*.5,width*.7);glow.addColorStop(0,'#f5f6e9');glow.addColorStop(1,'#e5ecda');ctx.fillStyle=glow;ctx.fillRect(0,0,width,height);
+    // The city sits on a softly raised island.
+    polygon([project(-.65,11.65),project(11.65,11.65),project(11.65,11.65,-.2),project(-.65,11.65,-.2)],'#d2ddc5');
+    polygon([project(11.65,-.65),project(11.65,11.65),project(11.65,11.65,-.2),project(11.65,-.65,-.2)],'#c7d5bb');
+    tile(-.65,-.65,12.3,12.3,'#dfe8ce');
+    // Small plots and courtyards.
+    for(let x=0;x<12;x++)for(let y=0;y<12;y++){if(x!==8&&![1,4,7,10].includes(x)&&![1,4,7,10].includes(y))tile(x-.45,y-.45,.9,.9,(x+y)%3===0?'#d5e1c4':'#e3e9d4');}
+    tile(8.05,-.65,1,12.3,'#a5c8bd');tile(8.05,-.65,.08,12.3,'#c0d5bb');tile(9,-.65,.08,12.3,'#c0d5bb');
+    for(let i=0;i<17;i++){const y=-.3+i*.72+Math.sin(renderClock*.4+i)*.08;lineWorld([{x:8.3,y:y},{x:8.7,y:y}],i%2?'#b4d2c6':'#94beb3',.7);}
+    const roads=[1,4,7,10];
+    roads.forEach(n=>{tile(n-.18,-.65,.36,12.3,'#c7d0bc');tile(n-.12,-.65,.24,12.3,'#eaf0de');tile(-.65,n-.18,12.3,.36,'#c7d0bc');tile(-.65,n-.12,12.3,.24,'#eaf0de');});
+    roads.forEach(n=>{box(8,n-.24,1.1,.48,.05,['#e7e8d5','#c0cbb4','#aabca6']);lineWorld([{x:8.05,y:n-.23,z:.1},{x:9.05,y:n-.23,z:.1}],'#a9bba1',1);lineWorld([{x:8.05,y:n+.23,z:.1},{x:9.05,y:n+.23,z:.1}],'#a9bba1',1);});
+    const riverText=project(8.55,8.8);ctx.save();ctx.translate(riverText.x,riverText.y);ctx.rotate(Math.PI/6);ctx.font='italic 9px Georgia, serif';ctx.textAlign='center';ctx.fillStyle='#729e91';ctx.fillText('р. Тихая',0,0);ctx.restore();
+    // Station square and park paths.
+    tile(.1,8.8,.5,1.5,'#d2d9c4');tile(9.4,8,1.6,.11,'#d2dabc');tile(10.8,8,0.1,3,'#d2dabc');
+    state.routes.forEach(r=>{const points=routePath(r.stops);lineWorld(points,'#ffffffa0',6*zoom);lineWorld(points,r.color,3.1*zoom);});
+    if(draft.length>1){lineWorld(routePath(draft),'#ffffffb0',7*zoom);lineWorld(routePath(draft),G.COLORS[(state.nextRoute-1)%6],3.5*zoom,[5,4]);}
+    // Sort scenery by depth so farther houses stay behind nearer ones.
+    const scenery=buildings.map(b=>({depth:b.x+b.y,building:b})).concat(trees.map(t=>({depth:t.x+t.y,tree:t}))).sort((a,b)=>a.depth-b.depth);
+    scenery.forEach(o=>{if(o.building)drawBuilding(o.building);else drawTree(o.tree);});
+    drawVehicles(dt);drawStops();
+    const hour=(8+Math.floor(state.tick/12))%24;
+    if(hour>=20||hour<6){ctx.fillStyle='#203a5524';ctx.fillRect(0,0,width,height);}
+    if(state.event&&state.event.kind==='snow'){ctx.fillStyle='#ffffffaf';for(let i=0;i<65;i++){const x=(i*97+renderClock*8)%width,y=(i*53+renderClock*24)%height;ctx.beginPath();ctx.arc(x,y,1.1,0,Math.PI*2);ctx.fill();}}
+  }
+  function resize(){const r=canvas.getBoundingClientRect();width=r.width;height=r.height;const dpr=Math.min(window.devicePixelRatio||1,2);canvas.width=Math.round(width*dpr);canvas.height=Math.round(height*dpr);ctx.setTransform(dpr,0,0,dpr,0,0);}
+  new ResizeObserver(resize).observe(canvas);
+  function hitStop(x,y){let best=null,dist=Infinity;G.STOPS.forEach((s,i)=>{const p=project(s.x,s.y,.05);const d=Math.hypot(x-p.x,y-p.y);const labelHit=Math.abs(x-p.x)<42&&Math.abs(y-(p.y-18))<10;if((d<22||labelHit)&&d<dist){best=i;dist=d;}});return best;}
+  const pointers=new Map();let gesture=null;
+  canvas.addEventListener('pointerdown',e=>{
+    canvas.setPointerCapture(e.pointerId);pointers.set(e.pointerId,{x:e.clientX,y:e.clientY});
+    if(pointers.size===1)gesture={x:e.clientX,y:e.clientY,px:pan.x,py:pan.y,moved:false,multi:false};
+    if(pointers.size===2){const a=Array.from(pointers.values());gesture.multi=true;gesture.distance=Math.hypot(a[0].x-a[1].x,a[0].y-a[1].y);gesture.zoom=zoom;}
+  });
+  canvas.addEventListener('pointermove',e=>{
+    if(!pointers.has(e.pointerId)||!gesture)return;pointers.set(e.pointerId,{x:e.clientX,y:e.clientY});
+    if(pointers.size===2){const a=Array.from(pointers.values());zoom=Math.max(.65,Math.min(2.2,gesture.zoom*Math.hypot(a[0].x-a[1].x,a[0].y-a[1].y)/Math.max(1,gesture.distance)));gesture.moved=true;return;}
+    if(gesture.multi)return;
+    const dx=e.clientX-gesture.x,dy=e.clientY-gesture.y;
+    if(Math.hypot(dx,dy)>5)gesture.moved=true;
+    if(gesture.moved){pan.x=Math.max(-width,Math.min(width,gesture.px+dx));pan.y=Math.max(-height,Math.min(height,gesture.py+dy));}
+  });
+  function pointerEnd(e,cancelled){
+    pointers.delete(e.pointerId);if(!gesture)return;
+    if(!cancelled&&!gesture.moved&&!gesture.multi){const r=canvas.getBoundingClientRect(),id=hitStop(e.clientX-r.left,e.clientY-r.top);if(id!==null){if(building){if(draft[draft.length-1]===id)draft.pop();else if(draft.includes(id))toast('Эта остановка уже есть в маршруте.');else draft.push(id);updateBuild();}else{selectedStop=id;renderStop();}}else{selectedStop=null;$('stop-card').hidden=true;}}
+    if(!pointers.size)gesture=null;
+  }
+  canvas.addEventListener('pointerup',e=>pointerEnd(e,false));canvas.addEventListener('pointercancel',e=>pointerEnd(e,true));
+  canvas.addEventListener('wheel',e=>{e.preventDefault();zoom=Math.max(.65,Math.min(2.2,zoom*(e.deltaY<0?1.1:.9)));},{passive:false});
+  document.addEventListener('visibilitychange',()=>{last=0;acc=0;if(document.hidden)save();});window.addEventListener('pagehide',save);
+  let endedShown=false,wonShown=state.won;
+  function frame(time){
+    const dt=last?Math.min((time-last)/1000,.12):0;last=time;renderClock+=dt;
+    if(!paused&&!building&&!$('modal').open&&!document.hidden&&!state.ended){
+      acc+=dt*speed;let changed=false;
+      while(acc>=.9){G.tick(state);acc-=.9;changed=true;}
+      if(changed){renderUI();drainNotifications();}
+    }
+    saveElapsed+=dt;if(saveElapsed>=10){save();saveElapsed=0;}
+    if(state.ended&&!endedShown&&!$('modal').open){endedShown=true;showModal(modalTop('КОНЕЦ СМЕНЫ','Город ждёт перемен')+'<p>Бюджет и доверие исчерпаны. Вы доставили '+fmt(state.served)+' пассажиров. Следующая попытка может изменить судьбу города.</p><div class="dialog-actions"><button class="primary" data-action="restart">Начать заново</button><button class="secondary" data-action="close">Посмотреть город</button></div>');}
+    if(state.won&&!wonShown&&!$('modal').open){wonShown=true;showModal(modalTop('ПЕРВАЯ ГЛАВА ПРОЙДЕНА','Город в надёжных руках')+'<div class="intro-mark">↗</div><p>Больница связана с городом, доставлено '+fmt(state.served)+' пассажиров, население выросло до '+fmt(state.population)+'.</p><p>'+(state.choice==='deal'?'Вы выбрали инвестиции. Город растёт при поддержке Грача, а обязательства останутся частью вашей истории.':'Вы сохранили независимость. Горожане знают, что их транспорт принадлежит городу.')+'</p><p>Это финал первой главы прототипа. Можно продолжить развивать сеть в свободном режиме.</p><div class="dialog-actions"><button class="primary" data-action="close">Продолжить играть</button></div>');}
+    draw(dt);requestAnimationFrame(frame);
+  }
+  renderUI();resize();requestAnimationFrame(frame);
+  if(!state.introSeen)help(true);
+  if(!window.CITY_ROUTE_PORTABLE&&'serviceWorker' in navigator&&location.protocol!=='file:')navigator.serviceWorker.register('./sw.js').catch(()=>{});
+})();
+
+</script>
+</body>
+</html>
