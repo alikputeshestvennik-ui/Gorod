@@ -1,4 +1,4 @@
-import ru from '../../data/i18n/ru.json';
+import ru from '../../data/i18n/ru.json' with { type: 'json' };
 export type TextKey = keyof typeof ru;
 export function t(key: string, args: Record<string, string | number> = {}): string {
   let text: string = ru[key as TextKey] ?? key;

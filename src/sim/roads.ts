@@ -1,4 +1,4 @@
-import city from '../../data/balance/city.json';
+import city from '../../data/balance/city.json' with { type: 'json' };
 import type { District } from './types';
 export type RoadPoint = readonly [number, number];
 export const roadSegments = city.edges.map(edge => [city.nodes[edge.a], ...edge.via, city.nodes[edge.b]]);

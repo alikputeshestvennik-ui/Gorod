@@ -1,8 +1,8 @@
-import city from '../../data/balance/city.json';
-import economy from '../../data/balance/economy.json';
-import transport from '../../data/balance/transport.json';
-import districts from '../../data/balance/districts.json';
-import events from '../../data/balance/events.json';
+import city from '../../data/balance/city.json' with { type: 'json' };
+import economy from '../../data/balance/economy.json' with { type: 'json' };
+import transport from '../../data/balance/transport.json' with { type: 'json' };
+import districts from '../../data/balance/districts.json' with { type: 'json' };
+import events from '../../data/balance/events.json' with { type: 'json' };
 import type { Mode } from './types';
 function validate(value: unknown, path: string): void {
   if (typeof value === 'number' && !Number.isFinite(value)) throw new Error(`Некорректное число в ${path}`);

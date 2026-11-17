@@ -1,4 +1,4 @@
-import city from '../../data/balance/city.json';
+import city from '../../data/balance/city.json' with { type: 'json' };
 import { E, D } from './config';
 import type { World, Development } from './types';
 export const C = city;
