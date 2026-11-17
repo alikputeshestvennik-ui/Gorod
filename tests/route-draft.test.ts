@@ -25,10 +25,11 @@ describe('продление без потери действующего пут
   });
   it('продлевает без свободной машины, списывает только новые остановки и загружается', () => {
     const w = createWorld(); w.routes[0].vehicles = w.fleet;
-    const draft = new RouteDraft(w.routes[0].stops, true), before = w.money;
+    const draft = new RouteDraft(w.routes[0].stops, true), before = w.money, earned = w.goals.earned, construction = w.ledger.construction;
     draft.add(6); draft.side = 'start'; draft.add(7);
     expect(applyCommand(w, { type: 'editRoute', routeId: 1, stops: draft.stops }).ok).toBe(true);
-    expect(w.money).toBe(before - 2 * E.stopCost);
+    expect(w.ledger.construction - construction).toBe(2 * E.stopCost);
+    expect(w.money).toBe(before - 2 * E.stopCost + w.goals.earned - earned);
     expect(w.routes[0]).toMatchObject({ id: 1, vehicles: w.fleet, stops: [7, 0, 1, 2, 3, 6] });
     const memory = new Map<string, string>(); save(w, {setItem: (k,v) => { memory.set(k,v); }});
     expect(restore(memory.get(SAVE_KEY)!)).toEqual(w);

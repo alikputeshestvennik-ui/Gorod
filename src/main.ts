@@ -76,7 +76,7 @@ function start(){
   tutorial.onPrepare=()=>{cancel();ui.openPanel('map');};
   tutorial.onDone=()=>{cancel();ui.openPanel('map');};
   ui.onTutorial=()=>tutorial.restart();ui.onPanel=tab=>tutorial.signal(tab);
-  document.addEventListener('keydown',e=>{if(e.key==='Escape'&&draft)cancel();});
+  document.addEventListener('keydown',e=>{if(e.key==='Escape'&&draft){cancel();tutorial.signal('cancel');}});
   document.addEventListener('visibilitychange',()=>{last=0;accumulator=0;audio.setBlocked(document.hidden);if(document.hidden)persist();});
   window.addEventListener('pagehide',persist);
   const frame=(now:number)=>{
