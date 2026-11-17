@@ -121,7 +121,7 @@ export class CityMap {
       this.labels[d.id].title=Array.from(this.labels[d.id].children).filter(el=>!(el as HTMLElement).hidden).map(el=>el.textContent).join('\n');
       this.labels[d.id].classList.toggle('selected',draft.includes(d.id));
     }
-    for(const heat of this.heat.values())if(heat.visible){heat.instanceMatrix.needsUpdate=true;if(this.heat.instanceColor)heat.instanceColor.needsUpdate=true;}
+    for(const heat of this.heat.values())if(heat.visible){heat.instanceMatrix.needsUpdate=true;if(heat.instanceColor)heat.instanceColor.needsUpdate=true;}
   }
 
   draw(time:number,world:World,dt=1/60){
