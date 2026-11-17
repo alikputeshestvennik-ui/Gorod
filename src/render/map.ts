@@ -31,7 +31,7 @@ export class CityMap {
   private stops: THREE.Mesh[] = [];
   private labels: HTMLButtonElement[] = [];
   private lines = new THREE.Group();
-  private flowArrows = new THREE.LineSegments(new THREE.BufferGeometry(),new THREE.LineBasicMaterial({color:'#5bff83',depthTest:false,transparent:true,opacity:.85}));
+  private flowArrows = new THREE.LineSegments(new THREE.BufferGeometry(),new THREE.LineBasicMaterial({color:'#5bff83',depthTest:false,transparent:true,opacity:.55}));
   private flowSignature = '';
   private actors: Actors;
   private development: DevelopmentView;
@@ -58,9 +58,9 @@ export class CityMap {
     this.scenery = new Scenery(this.scene); this.atmosphere = new Atmosphere(this.scene, this.scenery.windows);
     this.actors = new Actors(this.scene);this.development = new DevelopmentView(this.scene);this.events = new EventView(this.scene);
     this.scene.add(this.lines,this.flowArrows);this.flowArrows.renderOrder=3;
-    const shapes=[new THREE.CircleGeometry(1,24),new THREE.RingGeometry(1.1,1.4,24),new THREE.RingGeometry(1.5,1.8,24)];
+    const shapes=[new THREE.CircleGeometry(.48,24),new THREE.RingGeometry(.55,.62,24),new THREE.RingGeometry(.70,.77,24)];
     MAP_LAYERS.forEach((layer,index)=>{
-      const heat=new THREE.InstancedMesh(shapes[index],new THREE.MeshBasicMaterial({transparent:true,opacity:0.55,depthWrite:false,depthTest:false}),20);
+      const heat=new THREE.InstancedMesh(shapes[index],new THREE.MeshBasicMaterial({transparent:true,opacity:0.32,depthWrite:false,depthTest:false}),20);
       heat.renderOrder=4;heat.instanceMatrix.setUsage(THREE.DynamicDrawUsage);heat.visible=false;heat.frustumCulled=false;
       this.heat.set(layer.id,heat);this.scene.add(heat);
     });

@@ -1,0 +1,56 @@
+/* Map-first layout. Expanded tools keep the same 44 px touch targets. */
+.city-name{padding:5px 9px;background:#fcfdf5df}.city-name b{font-size:12px}.city-name small{font-size:9px;margin-top:1px}
+header{height:44px}.header-actions button{padding:6px;width:44px}
+.stats{top:calc(var(--top) + 49px);width:auto;right:var(--right);gap:0;border-radius:12px;background:var(--panel);max-width:360px;pointer-events:auto;flex-wrap:wrap}
+.stats article{flex:1!important;border:0;background:none;border-radius:0;padding:5px 10px;height:44px}
+.stats article:nth-of-type(n+3){display:none}.stats article:first-of-type{flex:1.4!important}
+.stats small{font-size:9px}.stats strong{font-size:12px;margin-top:1px}
+#stats-toggle{order:3;border:0;background:none;width:44px;padding:4px;font-size:20px}
+.stats-open .stats article:nth-of-type(n+3){display:block;order:4;flex:1 0 30%!important;border-top:1px solid #d8e2cc}
+.stats-open #stats-toggle{transform:rotate(180deg)}
+.map-tools{top:calc(var(--top) + 98px);max-width:360px;gap:4px}
+.stats-open .map-tools{top:calc(var(--top) + 147px)}
+.map-tools #event-banner{font-size:10px;padding:5px 9px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;background:#fcfdf5dc}
+.map-tools #layer-legend{display:flex;flex-wrap:wrap;gap:3px 10px;background:#f3f7eceb;padding:5px 8px;font-size:9px;box-shadow:none}
+#layer-legend span{color:#244639}#layer-legend span::before{background:var(--layer-color);border:1px solid #234f3e55;width:6px;height:6px}
+#map[data-layers]:not([data-layers=""])::after{background:#11281e08;box-shadow:none}
+.stop-label{background:#f6f9edb8;font-size:9px;padding:3px 4px;max-width:100px}
+.stop-label.analytical{background:#f6f9ede6;color:#244639;text-shadow:none;line-height:12px}
+.stop-label [data-value]{display:inline-block;font-size:8px;margin:0 2px;color:#244639;border-bottom:2px solid var(--layer-color)}
+#goal-board{display:none}.goals-open #goal-board{display:grid}
+#goal-toggle{position:absolute;z-index:4;bottom:calc(var(--bottom) + 59px);left:var(--left);font-size:11px;padding:6px 10px;background:var(--panel)}
+#goal-toggle[aria-expanded="true"]{background:var(--green);color:var(--lime)}
+#growth{display:none}.stats-open #growth{display:block;position:absolute;bottom:50px;left:0}
+.zoom{bottom:calc(var(--bottom) + 111px + var(--goals-height,0px));gap:3px}
+.zoom button{font-size:18px;padding:5px;background:#fcfdf5cf}.rotate-tools{gap:3px}
+.map-bottom{bottom:calc(var(--bottom) + 59px)}
+.speed button{font-size:11px;padding:5px 8px}
+#debug{bottom:calc(var(--bottom) + 111px);left:var(--left);padding:4px 7px;border-radius:6px;font-size:9px;background:#234f3edb;z-index:5}
+.goals-open #debug{bottom:calc(var(--bottom) + 122px + var(--goals-height,0px))}
+#engagement-debug{bottom:calc(var(--bottom) + 150px + var(--goals-height,0px));font-size:9px;max-width:290px}
+#goal-celebration{top:auto;bottom:calc(var(--bottom) + 113px + var(--goals-height,0px));padding:9px;font-size:11px}
+.editing #goal-board,.panel-open #build-bar,.panel-open #goal-board,.panel-open #goal-toggle,.editing #goal-toggle{display:none}
+.panel-open .zoom,.panel-open .map-bottom{visibility:hidden}
+#draft-mode-label{display:flex;align-items:center;gap:8px;margin-bottom:5px;font-size:10px}
+#draft-mode{flex:1;min-width:0;font-size:11px;margin:0}
+#build-bar{padding:9px;max-height:45dvh}
+#build-hint{font-weight:500}#draft-hint{display:none!important}
+.transport-hint{font-size:10px;line-height:1.45;margin:7px 0}
+nav{box-shadow:0 3px 10px #284c3018}nav button{font-size:11px}
+@media(min-width:700px){.stats{width:330px}aside{width:350px}}
+@media(max-height:500px) and (min-width:600px){
+  header{width:225px}.stats{top:var(--top);left:calc(var(--left) + 235px);right:auto;width:320px}
+  .map-tools,.stats-open .map-tools{top:calc(var(--top) + 49px);max-width:310px}
+  .map-tools #layer-legend{max-width:310px}.map-tools #event-banner{max-width:310px}
+  #goal-toggle{left:calc(var(--left) + 320px);bottom:var(--bottom)}
+  .map-bottom{bottom:var(--bottom);left:auto;right:var(--right)}
+  .zoom,.editing .zoom{right:calc(var(--right) + min(360px,44vw) + 10px);bottom:calc(var(--bottom) + 60px)}
+  #debug{left:var(--left);bottom:calc(var(--bottom) + 60px)}.goals-open #debug{bottom:calc(var(--bottom) + 60px)}
+  #goal-celebration{left:auto;right:var(--right);width:min(360px,44vw);bottom:calc(var(--bottom) + 66px + var(--goals-height,0px))}
+  #engagement-debug{left:var(--left);bottom:calc(var(--bottom) + 85px);max-width:290px}
+  #build-bar{max-height:calc(100dvh - var(--top) - var(--bottom) - 78px)}
+}
+/* The guide reveals the task it points to, including on first launch. */
+.tutorial-open #goal-toggle{display:none}
+.tutorial-open[data-tutorial-step="plan"] #goal-board{display:grid}
+.tutorial-open:not([data-tutorial-step="plan"]) #goal-board{display:none}

@@ -38,6 +38,8 @@ test('спрос объясняет направления и создаёт т�
   test.setTimeout(120000);
   const errors: string[] = []; page.on('pageerror', error => errors.push(error.message));
   await page.goto('/'); await page.locator('#debug-toggle').click();
+  await page.locator('#settings').click();await page.locator('#engagement-toggle').check();await page.locator('#close').click();
+  await page.locator('#goal-toggle').click();
   await expect(page.locator('#demand-direction')).toContainText('→');
   await expect(page.locator('#demand-direction')).toContainText('поездок/ч');
   await page.locator('#demand-details').click();

@@ -13,6 +13,23 @@ export function roadClearance(x: number, z: number) {
   }
   return distance;
 }
+/** Place the shelter along an outgoing street, beyond the junction and outside the carriageway. */
+export function shelterPlacement(x:number,z:number) {
+  let best={x:x+.46,z:z+.9,angle:0,clearance:-1};
+  for(const path of roadSegments)for(let i=1;i<path.length;i++){
+    const a=path[i-1],b=path[i];
+    const other=a[0]===x&&a[1]===z?b:b[0]===x&&b[1]===z?a:undefined;if(!other)continue;
+    const length=Math.hypot(other[0]-x,other[1]-z);if(length<1.4)continue;
+    const dx=(other[0]-x)/length,dz=(other[1]-z)/length,angle=Math.atan2(dx,dz);
+    for(const side of [1,-1]){
+      const sx=x+dx*.9+dz*.46*side,sz=z+dz*.9-dx*.46*side;
+      let clearance=Infinity;
+      for(const across of [-.135,.135])for(const along of [-.31,.31])clearance=Math.min(clearance,roadClearance(sx+dz*across+dx*along,sz-dx*across+dz*along));
+      if(clearance>best.clearance)best={x:sx,z:sz,angle,clearance};
+    }
+  }
+  return best;
+}
 export function infrastructure(scene: THREE.Scene) {
   const g = new CityGeometry();
   const box = (c: string, x: number, y: number, z: number, sx: number, sy: number, sz: number, r = 0) => g.add('box', c, x, y, z, sx, sy, sz, r);
@@ -56,8 +73,10 @@ export function infrastructure(scene: THREE.Scene) {
   g.add('cylinder','#718275',13,.13,4,.7,.1,.7);g.add('cylinder','#95a879',13,.19,4,.4,.07,.4);
   // Bus shelters: recognisable platforms, seats, roof and glass side panels.
   for(const p of [[1,10],[1,7],[4,7],[4,4],[1,1],[7,1],[7,4],[10,4],[10,1],[10,7],[7,10],[4,10]]){
-    const [x,z]=p;box('#bbc9be',x+.35,.12,z,.25,.06,.6);box('#56766d',x+.4,.49,z,.27,.05,.62);
-    box('#84b5bb',x+.5,.31,z,.035,.34,.55);box('#ad7952',x+.36,.24,z,.1,.045,.4);
+    const {x,z,angle}=shelterPlacement(p[0],p[1]);
+    const part=(c:string,y:number,across:number,sx:number,sy:number,sz:number)=>box(c,x+Math.cos(angle)*across,y,z-Math.sin(angle)*across,sx,sy,sz,angle);
+    part('#bbc9be',.12,0,.25,.06,.6);part('#56766d',.49,0,.27,.05,.62);
+    part('#84b5bb',.31,.1,.035,.34,.55);part('#ad7952',.24,0,.1,.045,.4);
   }
   scene.add(g.finish());
 }

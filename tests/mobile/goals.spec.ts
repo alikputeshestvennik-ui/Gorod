@@ -8,6 +8,7 @@ for (const viewport of [{ width: 390, height: 844 }, { width: 844, height: 390 }
     await page.setViewportSize(viewport); await page.goto('/');
     await page.getByRole('button', { name: 'Пауза', exact: true }).click();
     await expect(page.locator('#goal-board article')).toHaveCount(3);
+    await page.locator('#goal-toggle').click();
     for (const slot of ['quick', 'medium', 'long']) {
       const card = page.locator(`[data-goal-slot="${slot}"]`);
       await expect(card).toBeVisible();
@@ -39,10 +40,12 @@ for (const viewport of [{ width: 390, height: 844 }, { width: 844, height: 390 }
     expect(saved.money).toBe(initial.money - 4000 + GOALS.quick.reward);
     await context.setOffline(false); await page.reload();
     await expect(page.locator('#goal-board article')).toHaveCount(3);
+    await page.locator('#goal-toggle').click();
     await expect(page.locator('#goal-celebration')).toBeHidden();
     const restored = await page.evaluate(key => JSON.parse(localStorage.getItem(key)!), key);
     expect(restored.goals).toEqual(saved.goals);
     await page.locator('#debug-toggle').click();
+    await page.locator('#settings').click();await page.locator('#engagement-toggle').check();await page.locator('#close').click();
     await expect(page.locator('#engagement-debug')).toContainText('Наград: 0 · активных задач: 3');
   });
 }
@@ -51,6 +54,7 @@ test('перевозки завершают задачу без нажатий, 
   const w = createWorld(); w.served = GOALS.medium.passengers - 1;
   await page.addInitScript(({key,w}) => localStorage.setItem(key, JSON.stringify(w)), {key,w});
   await page.goto('/'); await page.locator('#debug-toggle').click();
+    await page.locator('#settings').click();await page.locator('#engagement-toggle').check();await page.locator('#close').click();
   await expect(page.locator('#goal-celebration')).toContainText('выполнено! +6 000 ₽');
   await page.getByRole('button', { name: 'Пауза', exact: true }).click();
   await expect(page.locator('#engagement-debug')).toContainText('Наград: 1 · активных задач: 3');

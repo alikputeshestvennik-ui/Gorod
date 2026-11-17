@@ -6,6 +6,7 @@ import { grow } from '../src/sim/growth';
 import { restore } from '../src/core/save';
 import { modeShares, routeLength } from '../src/sim/demand';
 import { roadDistance, roadPath } from '../src/sim/roads';
+import { shelterPlacement } from '../src/render/infrastructure';
 import { Actors } from '../src/render/actors';
 import { EventView } from '../src/render/events';
 import { DevelopmentView } from '../src/render/development';
@@ -64,6 +65,13 @@ describe('живой город', () => {
 });
 
 describe('ограничения визуализации', () => {
+  it('павильоны стоят вдоль подходящей дороги и не выступают на проезжую часть',()=>{
+    for(const d of D.districts){
+      const p=shelterPlacement(d.x,d.y);
+      expect(p.clearance, d.name).toBeGreaterThan(.215);
+      expect(Math.hypot(p.x-d.x,p.z-d.y)).toBeGreaterThan(.8);
+    }
+  });
   it('количество людей связано с жителями и очередью, весь назначенный транспорт виден', () => {
     const scene=new THREE.Scene(),actors=new Actors(scene),w=createWorld(),center=new THREE.Vector3(5.5,0,5.5);
     actors.draw(w,1,1,'high',center);expect(actors.visiblePeople).toBe(0);

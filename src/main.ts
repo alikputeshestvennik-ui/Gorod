@@ -10,6 +10,7 @@ import { GameUI } from './ui/app';
 import { RouteDraft } from './core/route-draft';
 import { TutorialGuide } from './ui/tutorial';
 import './ui/style.css';
+import './ui/compact.css';
 import './ui/tutorial.css';
 function start(){
   const storage={getItem:(key:string)=>window.localStorage.getItem(key),setItem:(key:string,value:string)=>window.localStorage.setItem(key,value)};
@@ -35,7 +36,7 @@ function start(){
   const cancel=()=>{draft=null;editing=undefined;editor=undefined;map.building=false;accumulator=0;refresh();};
   ui.onCommand=cmd=>{
     const result=applyCommand(world,cmd);if(!result.ok){ui.toast(result.error);return;}
-    const messages={buyVehicle:'bought',assignVehicle:'assigned',releaseVehicle:'released',removeRoute:'removed',setFare:'fareChanged',serviceFleet:'serviced',takeLoan:'loanChanged',repayLoan:'loanChanged',editRoute:'edited',buildRoute:'newRoute'};
+    const messages={changeRouteMode:'routeModeChanged',buyVehicle:'bought',assignVehicle:'assigned',releaseVehicle:'released',removeRoute:'removed',setFare:'fareChanged',serviceFleet:'serviced',takeLoan:'loanChanged',repayLoan:'loanChanged',editRoute:'edited',buildRoute:'newRoute'};
     engagement.decision();ui.toast(messages[cmd.type]);audio.cue();rewards();persist();refresh();
   };
   const begin=(id?:number,extending=false)=>{
@@ -60,6 +61,7 @@ function start(){
     draft=editor.stops;refresh();
   };
   map.onStop=id=>{
+    if(ui.panelOpen)return;
     if(!editor)begin();
     if(!editor)return;
     const result=editor.add(id);draft=editor.stops;
@@ -75,7 +77,7 @@ function start(){
   };
   tutorial.onPrepare=()=>{cancel();ui.openPanel('map');};
   tutorial.onDone=()=>{cancel();ui.openPanel('map');};
-  ui.onTutorial=()=>tutorial.restart();ui.onPanel=tab=>tutorial.signal(tab);
+  ui.onTutorial=()=>tutorial.restart();ui.onPanel=tab=>{map.building=draft!==null&&tab==='map';tutorial.signal(tab);};
   document.addEventListener('keydown',e=>{if(e.key==='Escape'&&draft){cancel();tutorial.signal('cancel');}});
   document.addEventListener('visibilitychange',()=>{last=0;accumulator=0;audio.setBlocked(document.hidden);if(document.hidden)persist();});
   window.addEventListener('pagehide',persist);
