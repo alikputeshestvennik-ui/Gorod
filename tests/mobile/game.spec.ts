@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from './fixtures';
 const key='gorodskoy-marshrut:stage2:v2';
 test('карта на весь экран, редактор, автопарк, слои и офлайн',async({page,context})=>{
   const errors:string[]=[],external:string[]=[];

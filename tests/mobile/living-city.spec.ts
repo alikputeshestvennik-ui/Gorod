@@ -1,4 +1,5 @@
-import { test, expect, type Page } from '@playwright/test';
+import { test, expect } from './fixtures';
+import type { Page } from '@playwright/test';
 import { createWorld, step } from '../../src/sim/world';
 import { E } from '../../src/sim/config';
 import { C } from '../../src/sim/development';
@@ -14,7 +15,7 @@ async function prepare(page:Page,world:ReturnType<typeof createWorld>){
   await expect(page.locator('canvas')).toBeVisible();
 }
 test('стройка, новый квартал, маршрут к нему и отчёт о населении',async({page})=>{
-  const errors:string[]=[];page.on('pageerror',e=>errors.push(e.message));
+  const errors:string[]=[];page.on('pageerror',e=>errors.push(e.message));page.on('console',msg=>{if(msg.type()==='error')errors.push(msg.text());});
   const w=createWorld();step(w,E.minutesPerDay*C.constructionDays);
   await prepare(page,w);await page.locator('#zoom-out').click();await page.locator('#zoom-out').click();
   await expect(page.locator('.stop-label')).toHaveCount(13);
@@ -27,10 +28,12 @@ test('стройка, новый квартал, маршрут к нему и �
   expect(errors).toEqual([]);
 });
 test('снег, ливень, ремонт, матч и ночное видение в пределах бюджета графики',async({page})=>{
-  const errors:string[]=[];page.on('pageerror',e=>errors.push(e.message));
+  const errors:string[]=[];page.on('pageerror',e=>errors.push(e.message));page.on('console',msg=>{if(msg.type()==='error')errors.push(msg.text());});
   const w=createWorld();step(w,5);w.event={id:'snow',until:10000};w.nextEvent={id:'match',at:11000};
   await prepare(page,w);await page.locator('#debug-toggle').click();
-  await page.waitForTimeout(1600);await page.screenshot({path:'artifacts/living-snow.png'});
+  await page.waitForTimeout(5000);await page.screenshot({path:'artifacts/living-snow.png'});
+  console.log('SNOW_GRAPHICS',await page.locator('#debug').textContent());
+  await page.locator('#rotate-right').click();await page.screenshot({path:'artifacts/snow-river-rotated.png'});
   for(const id of ['rain','repair','match']){
     await page.evaluate(({key,id})=>{const saved=JSON.parse(localStorage.getItem(key)!);saved.event={id,until:10000};saved.nextEvent={id:'fair',at:11000};sessionStorage.setItem('living-scenario',JSON.stringify(saved));},{key,id});
     await page.reload();await page.getByRole('button',{name:'Пауза',exact:true}).click();await page.locator('#debug-toggle').click();

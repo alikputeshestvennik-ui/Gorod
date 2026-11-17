@@ -1,3 +1,4 @@
+import type { RouteDraft } from '../core/route-draft';
 import { t, number } from '../core/i18n';
 import { MAP_LAYERS, type Layer } from '../core/layers';
 import type { Settings } from '../core/settings';
@@ -12,7 +13,10 @@ import type { Command, Mode, World } from '../sim/types';
 export class GameUI {
   onCommand: (cmd: Command) => void = () => {};
   onBuild: () => void = () => {};
+  onTutorial: () => void = () => {};
+  onPanel: (tab: string) => void = () => {};
   onSuggest: (stops: number[]) => void = () => {};
+  onExtend: (id:number) => void = () => {};
   onEdit: (id:number) => void = () => {};
   onDraft: (action:string,index?:number) => void = () => {};
   onCancel: () => void = () => {};
@@ -45,7 +49,7 @@ export class GameUI {
       <output id="goal-celebration" role="status" hidden></output>
       <div class="map-bottom"><button id="growth" aria-label="${t('cityReport')}"></button><div class="speed">${[0,1,2,4].map(n=>`<button data-speed="${n}" class="${n===1?'active':''}" aria-label="${n===0?t('pause'):t('speed')+' '+n}">${n===0?'Ⅱ':n+'×'}</button>`).join('')}</div></div>
       <aside hidden><div class="panel-top"><b id="panel-title"></b><button id="panel-close" aria-label="${t('close')}">×</button></div><div id="panel"></div></aside>
-      <div id="build-bar" hidden><b id="build-hint"></b><small>${t('draftHint')}</small><div id="selection"></div><div class="draft-tools"><select id="draft-end"><option value="end">${t('appendEnd')}</option><option value="start">${t('appendStart')}</option></select><button id="undo">↶</button><button id="clear-draft">${t('clearDraft')}</button></div><div class="build-actions"><button id="cancel">${t('cancel')}</button><button id="confirm" class="primary"></button></div></div>
+      <div id="build-bar" hidden><b id="build-hint"></b><small id="draft-hint">${t('draftHint')}</small><div id="selection"></div><div class="draft-tools"><select id="draft-end"><option value="end">${t('appendEnd')}</option><option value="start">${t('appendStart')}</option></select><button id="undo">↶</button><button id="clear-draft">${t('clearDraft')}</button></div><div class="build-actions"><button id="cancel">${t('cancel')}</button><button id="confirm" class="primary"></button></div></div>
       <nav>${['map','routes','fleet','finance'].map(key=>`<button data-tab="${key}" class="${key==='map'?'active':''}">${t(key)}</button>`).join('')}</nav>
       <dialog id="modal"><div id="dialog-body"></div><button id="close">${t('close')}</button></dialog><div id="toast" role="status"></div>`;
     this.mapHost=document.querySelector('#map')!;this.modal=document.querySelector('#modal')!;
@@ -70,8 +74,8 @@ export class GameUI {
       this.settings={version:1,quality:document.querySelector<HTMLSelectElement>('#quality')!.value as Settings['quality'],time:document.querySelector<HTMLSelectElement>('#time-of-day')!.value as Settings['time'],sound:document.querySelector<HTMLInputElement>('#sound')!.checked};
       this.onSettings({...this.settings});
     });
-    click('help',()=>this.showDialog(`<h2>${t('help')}</h2><p>${t('helpText')}</p><button id="reset">${t('reset')}</button>`));
-    this.modal.addEventListener('click',e=>{if((e.target as HTMLElement).id==='reset'){
+    click('help',()=>this.showDialog(`<h2>${t('help')}</h2><button id="tutorial-replay" class="primary wide">${t('tutorialReplay')}</button><p>${t('helpText')}</p><button id="reset">${t('reset')}</button>`));
+    this.modal.addEventListener('click',e=>{if((e.target as HTMLElement).id==='tutorial-replay'){this.modal.close();this.onTutorial();}if((e.target as HTMLElement).id==='reset'){
       this.showDialog(`<h2>${t('resetTitle')}</h2><p>${t('resetText')}</p><button id="reset-confirm" class="primary">${t('resetConfirm')}</button>`);
       click('reset-confirm',()=>{this.onReset();this.modal.close();});
     }});
@@ -106,7 +110,8 @@ export class GameUI {
       if(b.dataset.action==='repay')this.onCommand({type:'repayLoan'});
       if(b.dataset.assign)this.onCommand({type:'assignVehicle',routeId:Number(b.dataset.assign)});
       if(b.dataset.release)this.onCommand({type:'releaseVehicle',routeId:Number(b.dataset.release)});
-      if(b.dataset.edit||b.dataset.extend)this.onEdit(Number(b.dataset.edit??b.dataset.extend));
+      if(b.dataset.edit)this.onEdit(Number(b.dataset.edit));
+      if(b.dataset.extend)this.onExtend(Number(b.dataset.extend));
       if(b.dataset.remove){const id=Number(b.dataset.remove);this.showDialog(`<h2>${t('removeTitle',{id})}</h2><p>${t('removeText')}</p><button id="remove-confirm" class="primary">${t('removeConfirm')}</button>`);click('remove-confirm',()=>{this.onCommand({type:'removeRoute',routeId:id});this.modal.close();});}
     };
   }
@@ -124,7 +129,7 @@ export class GameUI {
     this.tab=tab==='map'?'':tab;document.querySelector('aside')!.hidden=!this.tab;
     document.getElementById('panel-title')!.textContent=this.tab?t(this.tab):'';
     document.querySelectorAll<HTMLButtonElement>('[data-tab]').forEach(b=>b.classList.toggle('active',b.dataset.tab===(this.tab||'map')));
-    this.panelSignature='';if(this.world)this.update(this.world);
+    this.panelSignature='';if(this.world)this.update(this.world);this.onPanel(tab);
   }
   private showDialog(html:string){document.getElementById('dialog-body')!.innerHTML=html;this.onModal(true);if(!this.modal.open)this.modal.showModal();}
   toast(key:string,args:Record<string,string|number>={}){const el=document.getElementById('toast')!;el.textContent=t(key,args);el.classList.add('show');clearTimeout(this.toastTimer);this.toastTimer=window.setTimeout(()=>el.classList.remove('show'),4000);}
@@ -145,17 +150,23 @@ export class GameUI {
     if(signature===this.panelSignature)return;this.panelSignature=signature;
     panel.innerHTML=this.tab==='routes'?routesPanel(w,this.mode):this.tab==='fleet'?fleetPanel(w):financePanel(w);
   }
-  build(draft:number[]|null,routeId?:number){
+  build(draft:number[]|null,routeId?:number,editor?:RouteDraft){
     document.getElementById('app')!.classList.toggle('editing',draft!==null);
     document.getElementById('build-bar')!.hidden=draft===null;
     if(!draft){this.draftSignature='';return;}
-    const signature=JSON.stringify([draft,routeId,this.mode]);if(signature===this.draftSignature)return;this.draftSignature=signature;
+    const signature=JSON.stringify([draft,routeId,this.mode,editor?.side,editor?.extending]);if(signature===this.draftSignature)return;this.draftSignature=signature;
     if(draft){
-      document.getElementById('build-hint')!.textContent=t(routeId?'editHint':'buildHint');
-      document.getElementById('selection')!.innerHTML=draft.map((id,index)=>`<button data-index="${index}" aria-label="${t('draftRemove',{name:t(this.world.districts[id].name)})}">${index+1}. ${t(this.world.districts[id].name)} ×</button>`).join('')||t('selected',{count:0});
+      const extending=editor?.extending??false;
+      const endpoint=editor?.endpoint;
+      document.getElementById('build-hint')!.textContent=extending?t('extendHint',{id:routeId!,name:endpoint===undefined?'':t(this.world.districts[endpoint].name)}):t(routeId?'editHint':'buildHint');
+      document.getElementById('draft-hint')!.textContent=t(extending?'extendDraftHint':'draftHint');
+      document.querySelector<HTMLSelectElement>('#draft-end')!.value=editor?.side??'end';
+      document.getElementById('clear-draft')!.textContent=t(extending?'resetExtension':'clearDraft');
+      document.querySelector<HTMLButtonElement>('#undo')!.disabled=!draft.length||!!(extending&&editor?.original.includes(editor.endpoint!));
+      document.getElementById('selection')!.innerHTML=draft.map((id,index)=>`<button ${extending&&editor?.original.includes(id)?'disabled':''} class="${extending&&!editor?.original.includes(id)?'draft-added':''}" data-index="${index}" aria-label="${t('draftRemove',{name:t(this.world.districts[id].name)})}">${index+1}. ${t(this.world.districts[id].name)} ${extending&&editor?.original.includes(id)?'':'×'}</button>`).join('')||t('selected',{count:0});
       const button=document.querySelector<HTMLButtonElement>('#confirm')!;
       const mode=this.world.routes.find(r=>r.id===routeId)?.mode??this.mode;
-      button.textContent=t(routeId?'editConfirm':'confirm',{cost:number(constructionCost(this.world,draft,mode,routeId))});button.disabled=draft.length<2;
+      button.textContent=t(extending?'extendConfirm':routeId?'editConfirm':'confirm',{cost:number(constructionCost(this.world,draft,mode,routeId))});button.disabled=draft.length<2||!!routeId&&!editor?.changed;
       document.getElementById('app')!.style.setProperty('--build-height',`${document.getElementById('build-bar')!.offsetHeight}px`);
     }
   }

@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from './fixtures';
 
 const layers = ['demand', 'load', 'complaints'];
 for (const viewport of [{ width: 390, height: 844 }, { width: 844, height: 390 }]) {

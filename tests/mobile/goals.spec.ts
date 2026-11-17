@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from './fixtures';
 import { createWorld } from '../../src/sim/world';
 import { GOALS } from '../../src/sim/goals';
 const key = 'gorodskoy-marshrut:stage2:v2';

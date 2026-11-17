@@ -50,3 +50,6 @@
 }
 
 @media(min-width:1000px) and (min-height:501px){#goal-board{right:auto;width:450px}}
+
+#selection .draft-added{border-color:#bd8038;background:#fff0d3;color:#784719}#selection button:disabled{opacity:.8}
+.stop-label.extend-endpoint{outline:2px solid #e28e42;background:#fff0d3;box-shadow:0 0 0 4px #e28e4228}

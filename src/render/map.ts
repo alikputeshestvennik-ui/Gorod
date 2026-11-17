@@ -4,6 +4,7 @@ import type { World } from '../sim/types';
 import { Actors } from './actors';
 import { DevelopmentView } from './development';
 import { EventView } from './events';
+import { SnowCover } from './snow';
 import { roadPath } from '../sim/roads';
 import { eventConfig } from '../sim/events';
 import { demandFlows } from '../sim/insights';
@@ -35,6 +36,7 @@ export class CityMap {
   private actors: Actors;
   private development: DevelopmentView;
   private events: EventView;
+  private snowCover = new SnowCover();
   private heat = new Map<Layer, THREE.InstancedMesh>();
   private tint=new THREE.Color();
   private signature = '';
@@ -77,7 +79,7 @@ export class CityMap {
   rotate(delta:number){this.controls.rotate(delta);}
   recenter(){this.controls.recenter();}
   get light(){return this.daylight;}
-  update(world:World,draft:number[]) {
+  update(world:World,draft:number[],endpoint?:number) {
     const flows=demandFlows(world),hourly=world.districts.map(()=>0);
     for(const flow of flows)hourly[flow.from]+=flow.perHour;
     const top=flows.slice(0,feedback.topFlowCount),flowSignature=JSON.stringify(top.map(f=>[f.from,f.to]));
@@ -138,6 +140,7 @@ export class CityMap {
       this.labels[d.id].classList.toggle('analytical',this.layers.size>0);
       this.labels[d.id].title=Array.from(this.labels[d.id].children).filter(el=>!(el as HTMLElement).hidden).map(el=>el.textContent).join('\n');
       this.labels[d.id].classList.toggle('selected',draft.includes(d.id));
+      this.labels[d.id].classList.toggle('extend-endpoint',d.id===endpoint);
     }
     for(const heat of this.heat.values())if(heat.visible){heat.instanceMatrix.needsUpdate=true;if(heat.instanceColor)heat.instanceColor.needsUpdate=true;}
   }
@@ -145,7 +148,8 @@ export class CityMap {
   draw(time:number,world:World,dt=1/60,minute=world.minute){
     this.controls.update(dt);this.scenery.update(this.controls.camera,this.controls.zoom,this.quality);
     this.daylight=this.atmosphere.update(minute,this.time,world.event?.id,dt);
-    this.events.update(world,time,this.quality,this.controls.center);this.host.dataset.event=world.event?.id??'';
+    this.snowCover.update(this.scene,world.event?.id==='snow',dt);
+    this.events.update(world,time,this.quality,this.controls.center,dt,this.controls.zoom,this.renderer.getPixelRatio());this.host.dataset.event=world.event?.id??'';
     this.actors.draw(world,time,this.controls.zoom,this.quality,this.controls.center);
     this.host.dataset.people=String(this.actors.visiblePeople);this.host.dataset.vehicles=String(this.actors.visibleVehicles);this.host.dataset.taxis=String(this.actors.visibleTaxis);
     for(const d of world.districts){

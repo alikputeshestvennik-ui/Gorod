@@ -1,0 +1,58 @@
+#tutorial{position:absolute;inset:0;z-index:12;pointer-events:none;display:flex;align-items:flex-start;padding:calc(var(--top) + 65px) var(--right) var(--bottom) var(--left)}
+.tutorial-card{pointer-events:auto;width:min(100%,390px);padding:15px 17px;border:1px solid #7cbbb45c;border-radius:20px;background:linear-gradient(135deg,#153c42f7,#142b39fa);color:#eef8f4;box-shadow:0 12px 40px #102c3845;animation:coach-in .24s ease-out}
+.tutorial-eyebrow{display:flex;justify-content:space-between;align-items:center;gap:8px;color:#9fcec5;font-size:10px;letter-spacing:.03em}
+.tutorial-paused{white-space:nowrap;font-size:9px;padding:4px 6px;border:1px solid #8fbab33b;border-radius:20px;color:#d0dfd2}
+.tutorial-heading{display:flex;align-items:center;gap:10px;margin-top:10px}
+.tutorial-icon{display:grid;place-items:center;flex:0 0 32px;height:32px;border:1px solid #b5e6cf4a;border-radius:10px;color:#d2f5aa;background:#80c7ae12;font-size:23px}
+#tutorial h2{margin:0;color:#f1f8ef;font-size:17px;line-height:1.25;letter-spacing:-.025em}
+#tutorial p{margin:9px 0 12px;color:#c8dcd9;font-size:12px;line-height:1.55}
+.tutorial-progress{display:flex;gap:5px;margin:8px 0 12px}
+.tutorial-progress i{height:3px;flex:1;background:#a0c4c325;border-radius:4px}
+.tutorial-progress .filled{background:#ceeea0}
+.tutorial-actions{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.tutorial-actions button{font-size:12px;border-color:#7db3ad45;background:transparent;color:#b8d5d1;padding:8px 10px}
+.tutorial-actions .primary{background:#d5efaa;border-color:#d5efaa;color:#173d37;font-weight:750}
+.tutorial-hero{display:none}
+.tutorial-target{outline:2px solid #e6b25f!important;outline-offset:4px;box-shadow:0 0 0 6px #ecb55330,0 0 24px #ffd07845!important;z-index:10!important}
+.tutorial-open .stats,.tutorial-open #event-banner,.tutorial-open #crisis{display:none}
+.tutorial-open .map-tools{top:calc(var(--top) + 65px)}
+.tutorial-open:not([data-tutorial-step="demand"]):not([data-tutorial-step="layers"]) .map-tools{visibility:hidden}
+[data-tutorial-step="demand"] #tutorial,[data-tutorial-step="layers"] #tutorial{padding-top:calc(var(--top) + 120px)}
+.tutorial-open #layer-legend{display:none!important}
+.tutorial-open #goal-celebration{top:auto;bottom:calc(var(--bottom) + 116px + var(--goals-height,160px))}
+.tutorial-welcome #tutorial{align-items:center;justify-content:center;padding:var(--top) var(--right) var(--bottom) var(--left);background:#0b233b91;backdrop-filter:blur(5px)}
+.tutorial-welcome .tutorial-card{padding:23px;max-height:calc(100dvh - var(--top) - var(--bottom));overflow:auto;border-radius:26px;background:radial-gradient(ellipse at 90% 0%,#32736b66,transparent 65%),linear-gradient(145deg,#183f48,#122c3d)}
+.tutorial-welcome .tutorial-hero{display:block;margin:20px -6px 10px;padding:12px 0;border-radius:16px;background:linear-gradient(135deg,#8dd7bf0b,#d4efaa12)}
+.tutorial-hero svg{width:100%;display:block;overflow:visible}
+.tutorial-road{fill:none;stroke:#64858044;stroke-width:16}
+.tutorial-route{fill:none;stroke:#d9ef9f;stroke-width:3;stroke-dasharray:5 4;animation:route-flow 1.2s linear infinite}
+.tutorial-buildings path:first-child{fill:#78a6a12b;stroke:#81b7ae;stroke-width:2;stroke-linejoin:round}
+.tutorial-buildings path+path{fill:none;stroke:#eed7a4;stroke-width:3}
+.tutorial-stations{fill:#244a4d;stroke:#d9ef9f;stroke-width:3}
+.tutorial-bus rect{fill:#f1ba74;stroke:#f7d8a6;stroke-width:1}
+.tutorial-bus path{fill:#244756}
+.tutorial-welcome #tutorial h2{font-size:27px;line-height:1.12;letter-spacing:-.04em}
+.tutorial-welcome #tutorial p{font-size:14px;line-height:1.65;margin:15px 0 22px}
+.tutorial-welcome .tutorial-icon{display:none}
+.tutorial-welcome .tutorial-actions button{font-size:14px}
+@keyframes route-flow{to{stroke-dashoffset:-18}}
+@keyframes coach-in{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:translateY(0)}}
+@media(max-height:500px) and (min-width:600px){
+  #tutorial{padding-top:calc(var(--top) + 65px)}
+  .tutorial-card{width:310px;padding:10px 12px;border-radius:16px}
+  [data-tutorial-step="demand"] #tutorial,[data-tutorial-step="layers"] #tutorial{padding-top:calc(var(--top) + 118px)}
+  #tutorial p{font-size:11px;line-height:1.4;margin:7px 0}
+  #tutorial h2{font-size:16px}
+  .tutorial-heading{margin-top:7px;gap:7px}
+  .tutorial-icon{flex-basis:26px;height:26px;font-size:18px}
+  .tutorial-progress{margin:7px 0}
+  .tutorial-welcome .tutorial-card{width:570px;display:grid;grid-template-columns:190px 1fr;column-gap:22px;padding:20px}
+  .tutorial-welcome .tutorial-eyebrow{grid-column:1 / -1}
+  .tutorial-welcome .tutorial-hero{grid-column:1;grid-row:2 / 5;align-self:center}
+  .tutorial-welcome .tutorial-heading,.tutorial-welcome #tutorial p,.tutorial-welcome .tutorial-progress{grid-column:2}
+  .tutorial-welcome #tutorial h2{font-size:24px}
+  .tutorial-welcome #tutorial p{font-size:12px;margin:10px 0}
+  .tutorial-welcome .tutorial-actions{grid-column:1 / -1;margin-top:12px}
+  .tutorial-open #goal-celebration{left:auto;right:var(--right);width:min(360px,44vw);bottom:calc(var(--bottom) + 66px + var(--goals-height,160px))}
+}
+@media(prefers-reduced-motion:reduce){.tutorial-card,.tutorial-route{animation:none}}

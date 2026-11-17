@@ -21,6 +21,7 @@ export class Scenery {
     const island = new THREE.Mesh(new THREE.BoxGeometry(13.8, 0.15, 13.8), new THREE.MeshLambertMaterial({ color: '#ccd3b2' }));
     island.position.set(5.5, -0.04, 5.5); scene.add(island);
     const water = new THREE.Mesh(new THREE.BoxGeometry(1.05, 0.04, 36), new THREE.MeshLambertMaterial({ color: '#72b8c2' }));
+    water.name = 'river'; water.userData.noSnow = true;
     water.position.set(8.5, 0.025, 5.5); scene.add(water);
     infrastructure(scene);
     const buildingMaterial = new THREE.MeshLambertMaterial({ color: '#ffffff', flatShading: true });

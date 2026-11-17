@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from './fixtures';
 
 for (const viewport of [{ width: 390, height: 844 }, { width: 844, height: 390 }]) {
   test(`редактор: пустое место двигает карту, слои доступны ${viewport.width}`, async ({ page, context }) => {
