@@ -6,6 +6,8 @@ import { DevelopmentView } from './development';
 import { EventView } from './events';
 import { roadPath } from '../sim/roads';
 import { eventConfig } from '../sim/events';
+import { demandFlows } from '../sim/insights';
+import feedback from '../../data/balance/feedback.json' with { type: 'json' };
 import { t, number } from '../core/i18n';
 import { MAP_LAYERS, type Layer } from '../core/layers';
 import { MapCamera } from './camera';
@@ -28,6 +30,8 @@ export class CityMap {
   private stops: THREE.Mesh[] = [];
   private labels: HTMLButtonElement[] = [];
   private lines = new THREE.Group();
+  private flowArrows = new THREE.LineSegments(new THREE.BufferGeometry(),new THREE.LineBasicMaterial({color:'#5bff83',depthTest:false,transparent:true,opacity:.85}));
+  private flowSignature = '';
   private actors: Actors;
   private development: DevelopmentView;
   private events: EventView;
@@ -51,7 +55,7 @@ export class CityMap {
     this.controls = new MapCamera(this.renderer.domElement,host); this.controls.onStop = id => this.onStop(id);
     this.scenery = new Scenery(this.scene); this.atmosphere = new Atmosphere(this.scene, this.scenery.windows);
     this.actors = new Actors(this.scene);this.development = new DevelopmentView(this.scene);this.events = new EventView(this.scene);
-    this.scene.add(this.lines);
+    this.scene.add(this.lines,this.flowArrows);this.flowArrows.renderOrder=3;
     const shapes=[new THREE.CircleGeometry(1,24),new THREE.RingGeometry(1.1,1.4,24),new THREE.RingGeometry(1.5,1.8,24)];
     MAP_LAYERS.forEach((layer,index)=>{
       const heat=new THREE.InstancedMesh(shapes[index],new THREE.MeshBasicMaterial({transparent:true,opacity:0.55,depthWrite:false,depthTest:false}),20);
@@ -74,6 +78,20 @@ export class CityMap {
   recenter(){this.controls.recenter();}
   get light(){return this.daylight;}
   update(world:World,draft:number[]) {
+    const flows=demandFlows(world),hourly=world.districts.map(()=>0);
+    for(const flow of flows)hourly[flow.from]+=flow.perHour;
+    const top=flows.slice(0,feedback.topFlowCount),flowSignature=JSON.stringify(top.map(f=>[f.from,f.to]));
+    this.flowArrows.visible=this.layers.has('demand');
+    if(flowSignature!==this.flowSignature){
+      this.flowSignature=flowSignature;const points:number[]=[];
+      for(const flow of top){
+        const a=world.districts[flow.from],b=world.districts[flow.to],dx=b.x-a.x,dz=b.y-a.y,len=Math.hypot(dx,dz);
+        const x=a.x+dx*.72,z=a.y+dz*.72,ux=dx/len,uz=dz/len;
+        points.push(a.x,.23,a.y,x,.23,z,x,.23,z,x-ux*.45-uz*.2,.23,z-uz*.45+ux*.2,x,.23,z,x-ux*.45+uz*.2,.23,z-uz*.45-ux*.2);
+      }
+      this.flowArrows.geometry.dispose();this.flowArrows.geometry=new THREE.BufferGeometry();
+      this.flowArrows.geometry.setAttribute('position',new THREE.Float32BufferAttribute(points,3));
+    }
     this.controls.districts=world.districts;this.development.update(world);
     this.host.dataset.layers=MAP_LAYERS.filter(layer=>this.layers.has(layer.id)).map(layer=>layer.id).join(' ');
     while(this.stops.length>world.districts.length){const stop=this.stops.pop()!;stop.geometry.dispose();(stop.material as THREE.Material).dispose();stop.removeFromParent();this.labels.pop()!.remove();}
@@ -109,10 +127,10 @@ export class CityMap {
       for(const layer of MAP_LAYERS){
         const active=this.layers.has(layer.id),value=this.labels[d.id].children[MAP_LAYERS.indexOf(layer)+1] as HTMLElement;value.hidden=!active;
         if(!active)continue;
-        const intensity=layer.id==='demand'?Math.min(1,generated/15):layer.id==='load'?Math.min(1,load):complaint;
+        const intensity=layer.id==='demand'?Math.min(1,hourly[d.id]/feedback.demandHighPerHour):layer.id==='load'?Math.min(1,load):complaint;
         this.tint.set(layer.color).multiplyScalar(.12+intensity*.88);
         const heat=this.heat.get(layer.id)!;heat.setMatrixAt(d.id,this.matrix);heat.setColorAt(d.id,this.tint);
-        const count=layer.id==='demand'?generated.toLocaleString('ru-RU',{maximumFractionDigits:1}):number((layer.id==='load'?load:complaint)*100);
+        const count=layer.id==='demand'?hourly[d.id].toLocaleString('ru-RU',{maximumFractionDigits:1}):number((layer.id==='load'?load:complaint)*100);
         value.textContent=t(layer.value,{count});
       }
       (this.stops[d.id].material as THREE.MeshBasicMaterial).color.set(draft.includes(d.id)?'#e28e42':'#31896b');
@@ -124,9 +142,9 @@ export class CityMap {
     for(const heat of this.heat.values())if(heat.visible){heat.instanceMatrix.needsUpdate=true;if(heat.instanceColor)heat.instanceColor.needsUpdate=true;}
   }
 
-  draw(time:number,world:World,dt=1/60){
+  draw(time:number,world:World,dt=1/60,minute=world.minute){
     this.controls.update(dt);this.scenery.update(this.controls.camera,this.controls.zoom,this.quality);
-    this.daylight=this.atmosphere.update(world.minute,this.time,world.event?.id);
+    this.daylight=this.atmosphere.update(minute,this.time,world.event?.id,dt);
     this.events.update(world,time,this.quality,this.controls.center);this.host.dataset.event=world.event?.id??'';
     this.actors.draw(world,time,this.controls.zoom,this.quality,this.controls.center);
     this.host.dataset.people=String(this.actors.visiblePeople);this.host.dataset.vehicles=String(this.actors.visibleVehicles);this.host.dataset.taxis=String(this.actors.visibleTaxis);
