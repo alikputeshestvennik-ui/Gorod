@@ -28,6 +28,7 @@ export class SnowCover {
           varying vec3 vSnowPosition;
           varying float vSnowUp;`);
         shader.fragmentShader = shader.fragmentShader.replace('#include <color_fragment>', `#include <color_fragment>
+          if (snowAmount > 0.001) {
           float drift = sin(vSnowPosition.x * 3.7 + sin(vSnowPosition.z * 2.3))
                       * sin(vSnowPosition.z * 4.1 + vSnowPosition.x * 0.8);
           float grain = 0.5 + 0.5 * sin(vSnowPosition.x * 11.0) * sin(vSnowPosition.z * 13.0);
@@ -35,7 +36,8 @@ export class SnowCover {
           float asphalt = 1.0 - smoothstep(0.30, 0.48, max(diffuseColor.r, max(diffuseColor.g, diffuseColor.b)));
           float coverage = smoothstep(drift * 0.25 + 0.04, drift * 0.25 + 0.6, snowAmount);
           coverage *= upward * mix(0.96, 0.34, asphalt);
-          diffuseColor.rgb = mix(diffuseColor.rgb, vec3(0.87, 0.94, 0.98) * (0.92 + grain * 0.08), coverage);`);
+          diffuseColor.rgb = mix(diffuseColor.rgb, vec3(0.87, 0.94, 0.98) * (0.92 + grain * 0.08), coverage);
+          }`);
       };
       material.customProgramCacheKey = () => 'surface-snow-v1';
       material.needsUpdate = true;
@@ -44,6 +46,7 @@ export class SnowCover {
   update(scene: THREE.Scene, snowing: boolean, dt: number) {
     // Accumulate gently; melt more slowly. Also discovers newly built districts.
     this.amount.value = THREE.MathUtils.damp(this.amount.value, snowing ? 0.85 : 0, snowing ? 0.14 : 0.055, dt);
+    if (!snowing && this.amount.value < 0.001) { this.amount.value = 0; return; }
     this.scanElapsed += dt;
     if (this.scanElapsed >= 0.4) { scene.traverse(this.coat); this.scanElapsed = 0; }
   }

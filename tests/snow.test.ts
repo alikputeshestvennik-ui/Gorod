@@ -26,3 +26,9 @@ it('снежинки движутся на паузе и масштабирую�
   weather.update(w,0,'high',new THREE.Vector3(),1/60);expect(snow.geometry.drawRange.count).toBe(960);
   expect(scene.children.some(child=>child instanceof THREE.Mesh&&child.geometry instanceof THREE.PlaneGeometry)).toBe(false);
 });
+it('не добавляет снежные шейдеры в сухом городе', () => {
+  const scene=new THREE.Scene(), ground=new THREE.Mesh(new THREE.BoxGeometry(),new THREE.MeshLambertMaterial());
+  scene.add(ground);const compile=ground.material.onBeforeCompile;
+  new SnowCover().update(scene,false,1);
+  expect(ground.material.onBeforeCompile).toBe(compile);
+});

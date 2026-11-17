@@ -56,3 +56,9 @@
   .tutorial-open #goal-celebration{left:auto;right:var(--right);width:min(360px,44vw);bottom:calc(var(--bottom) + 66px + var(--goals-height,160px))}
 }
 @media(prefers-reduced-motion:reduce){.tutorial-card,.tutorial-route{animation:none}}
+@media(max-height:500px) and (min-width:600px){
+  /* Leave the bottom tabs reachable even with the longer layer explanation. */
+  #tutorial{bottom:calc(var(--bottom) + 64px)}
+  .tutorial-card{max-height:100%;overflow:auto;overscroll-behavior:contain}
+  .tutorial-welcome #tutorial{bottom:0}
+}
