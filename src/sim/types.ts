@@ -26,6 +26,7 @@ export interface World {
   event: { id: string; until: number } | null; nextEvent: { id: string; at: number };
 }
 export type Command = { type: 'buildRoute'; stops: number[]; mode?: Mode } |
+  { type: 'changeRouteMode'; routeId: number; mode: Mode } |
   { type: 'editRoute'; routeId: number; stops: number[] } |
   { type: 'buyVehicle'; mode?: Mode } | { type: 'assignVehicle'; routeId: number } |
   { type: 'releaseVehicle'; routeId: number } | { type: 'setFare'; fare: number } |

@@ -33,6 +33,13 @@ export function applyCommand(w: World, cmd: Command): Result {
     if(cost>0&&w.money<cost)return fail('noMoney');
     w.money-=cost;w.expenses+=cost;w.ledger.construction+=cost;
     if(old){old.stops=[...cmd.stops];}else w.routes.push({id:w.nextRoute++,mode,stops:[...cmd.stops],vehicles:1,served:0});
+  } else if(cmd.type==='changeRouteMode') {
+    const route=w.routes.find(r=>r.id===cmd.routeId);if(!route)return fail('invalidRoute');
+    if(!['marshrutka','bus'].includes(route.mode)||!['marshrutka','bus'].includes(cmd.mode)||route.mode===cmd.mode)return fail('invalidCommand');
+    if(!unlocked(w,cmd.mode))return fail('modeLocked');
+    if(reserved(w,cmd.mode)<1)return fail('noReserve');
+    // Existing vehicles return to their own reserve; one vehicle of the new type starts service.
+    route.mode=cmd.mode;route.vehicles=1;
   } else if(cmd.type==='buyVehicle') {
     const mode=cmd.mode??'marshrutka';
     if(!MODES.includes(mode))return fail('invalidCommand');

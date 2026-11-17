@@ -45,6 +45,25 @@ describe('редактирование маршрутов и типы транс
     w.money=0;const old=getSnapshot(w);expect(applyCommand(w,{type:'editRoute',routeId:1,stops:[0,1,2,3,6]}).ok).toBe(false);expect(w).toEqual(old);
   });
 });
+describe('смена типа дорожной линии',()=>{
+  it('назначает купленный с первого дня автобус и возвращает все маршрутки в резерв',()=>{
+    const w=createWorld();applyCommand(w,{type:'assignVehicle',routeId:1});
+    expect(reserved(w,'marshrutka')).toBe(0);
+    expect(applyCommand(w,{type:'buyVehicle',mode:'bus'}).ok).toBe(true);
+    const money=w.money,stops=[...w.routes[0].stops];
+    expect(applyCommand(w,{type:'changeRouteMode',routeId:1,mode:'bus'}).ok).toBe(true);
+    expect(w.routes[0]).toMatchObject({id:1,mode:'bus',vehicles:1,stops});
+    expect(reserved(w,'marshrutka')).toBe(2);expect(reserved(w,'bus')).toBe(0);expect(w.money).toBe(money);
+    expect(restore(JSON.stringify(w))).toEqual(w);
+    expect(applyCommand(w,{type:'changeRouteMode',routeId:1,mode:'marshrutka'}).ok).toBe(true);
+    expect(reserved(w,'bus')).toBe(1);expect(reserved(w,'marshrutka')).toBe(1);
+  });
+  it('не меняет линию без резерва, для неверного номера или электротранспорта',()=>{
+    const w=createWorld(),before=getSnapshot(w);
+    for(const cmd of [{type:'changeRouteMode',routeId:1,mode:'bus'},{type:'changeRouteMode',routeId:99,mode:'bus'},{type:'changeRouteMode',routeId:1,mode:'tram'}] as const)expect(applyCommand(w,cmd).ok).toBe(false);
+    expect(w).toEqual(before);
+  });
+});
 describe('экономика, износ и события',()=>{
   it('сводит все статьи и кредиты, сохраняет допустимую цену',()=>{
     const w=createWorld();applyCommand(w,{type:'takeLoan'});applyCommand(w,{type:'buyVehicle',mode:'bus'});applyCommand(w,{type:'buildRoute',mode:'bus',stops:[6,7]});
