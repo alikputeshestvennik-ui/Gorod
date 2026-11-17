@@ -1,6 +1,7 @@
 import { createWorld, getSnapshot, applyCommand, step } from './sim/world';
 import { load, save } from './core/save';
-import { E } from './sim/config';
+import { E, MODES } from './sim/config';
+import { reserved, unlocked } from './sim/commands';
 import { t } from './core/i18n';
 import { readSettings, writeSettings } from './core/settings';
 import { CityAudio } from './core/audio';
@@ -45,7 +46,7 @@ function start(){
     map.building=true;accumulator=0;ui.openPanel('map');refresh();
   };
   ui.onBuild=()=>begin();ui.onEdit=id=>begin(id);ui.onExtend=id=>{begin(id,true);tutorial.signal('extending');};ui.onCancel=()=>{cancel();ui.openPanel('routes');tutorial.signal('cancel');};
-  ui.onSuggest=stops=>{ui.mode='marshrutka';begin();if(draft){editor!.stops=[...stops];draft=editor!.stops;refresh();tutorial.signal('planned');}};
+  ui.onSuggest=stops=>{ui.mode=MODES.find(mode=>unlocked(world,mode)&&reserved(world,mode)>0)??ui.mode;begin();if(draft){editor!.stops=[...stops];draft=editor!.stops;refresh();tutorial.signal('planned');}};
   ui.onConfirm=()=>{
     if(!draft||!editor||editing&&!editor.changed)return;
     const result=applyCommand(world,editing?{type:'editRoute',routeId:editing,stops:draft}:{type:'buildRoute',stops:draft,mode:ui.mode});

@@ -34,7 +34,7 @@ header{height:44px}.header-actions button{padding:6px;width:44px}
 #draft-mode-label{display:flex;align-items:center;gap:8px;margin-bottom:5px;font-size:10px}
 #draft-mode{flex:1;min-width:0;font-size:11px;margin:0}
 #build-bar{padding:9px;max-height:45dvh}
-#build-hint{font-weight:500}#draft-hint{display:none!important}
+#build-hint{font-weight:500}#draft-fleet{font-size:10px;padding:4px 6px;border-color:#bd8038}#draft-hint{display:none!important}
 .transport-hint{font-size:10px;line-height:1.45;margin:7px 0}
 nav{box-shadow:0 3px 10px #284c3018}nav button{font-size:11px}
 @media(min-width:700px){.stats{width:330px}aside{width:350px}}
@@ -42,6 +42,7 @@ nav{box-shadow:0 3px 10px #284c3018}nav button{font-size:11px}
   header{width:225px}.stats{top:var(--top);left:calc(var(--left) + 235px);right:auto;width:320px}
   .map-tools,.stats-open .map-tools{top:calc(var(--top) + 49px);max-width:310px}
   .map-tools #layer-legend{max-width:310px}.map-tools #event-banner{max-width:310px}
+  .stats-open .map-tools{top:calc(var(--top) + 98px)}
   #goal-toggle{left:calc(var(--left) + 320px);bottom:var(--bottom)}
   .map-bottom{bottom:var(--bottom);left:auto;right:var(--right)}
   .zoom,.editing .zoom{right:calc(var(--right) + min(360px,44vw) + 10px);bottom:calc(var(--bottom) + 60px)}

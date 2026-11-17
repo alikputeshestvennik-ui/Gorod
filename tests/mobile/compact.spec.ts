@@ -55,3 +55,13 @@ test('автопарк сразу создаёт автобусный черно
   await page.getByRole('button',{name:'Больница',exact:true}).click();await page.getByRole('button',{name:'Заречье',exact:true}).click();
   await page.locator('#confirm').click();await expect(page.locator('.route-card').nth(1)).toContainText('Автобус');
 });
+
+test('быстрая задача использует автобус при отсутствии резервных маршруток',async({page})=>{
+  await page.goto('/');await page.getByRole('button',{name:'Пауза',exact:true}).click();
+  await page.locator('[data-tab="routes"]').click();await page.locator('[data-assign="1"]').click();
+  await page.locator('[data-tab="fleet"]').click();await page.locator('[data-buy="bus"]').click();
+  await page.locator('[data-tab="map"]').click();await page.locator('#goal-toggle').click();
+  await expect(page.locator('#demand-suggest')).toHaveText('Проложить');await page.locator('#demand-suggest').click();
+  await expect(page.locator('#draft-mode')).toHaveValue('bus');await page.locator('#confirm').click();
+  await expect(page.locator('.route-card').nth(1)).toContainText('Автобус');
+});

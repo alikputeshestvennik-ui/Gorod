@@ -1,3 +1,4 @@
+import { canPlanGoal } from '../src/ui/goals';
 import { describe, expect, it } from 'vitest';
 import { createWorld, applyCommand, step } from '../src/sim/world';
 import { GOALS, goalProgress, initializeGoals, updateGoals } from '../src/sim/goals';
@@ -92,4 +93,13 @@ describe('три задачи города', () => {
       (w: any) => w.goals.links = ['7:6'],
     ]) { const w = createWorld(); corrupt(w); expect(restore(JSON.stringify(w))).toBeNull(); }
   });
+});
+
+it('предлагает быструю задачу для резервного автобуса без свободных маршруток',()=>{
+  const w=createWorld();applyCommand(w,{type:'assignVehicle',routeId:1});
+  expect(canPlanGoal(w)).toBe(false);
+  expect(applyCommand(w,{type:'buyVehicle',mode:'bus'}).ok).toBe(true);
+  expect(canPlanGoal(w)).toBe(true);
+  applyCommand(w,{type:'buildRoute',mode:'bus',stops:[6,7]});
+  expect(canPlanGoal(w)).toBe(false);
 });

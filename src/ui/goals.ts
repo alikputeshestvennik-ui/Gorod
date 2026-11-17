@@ -1,15 +1,15 @@
 import { t, number } from '../core/i18n';
 import { GOALS, GOAL_SLOTS, goalProgress } from '../sim/goals';
 import { demandFlows } from '../sim/insights';
-import { reserved } from '../sim/commands';
-import { E } from '../sim/config';
+import { reserved, unlocked } from '../sim/commands';
+import { E, MODES } from '../sim/config';
 import type { Goal, World } from '../sim/types';
 
 export function goalTitle(w: World, goal: Goal) {
   if (goal.kind === 'connect') return t('goalConnect', { from: t(w.districts[goal.from].name), to: t(w.districts[goal.to].name) });
   return t(goal.kind === 'coverage' ? 'goalCoverage' : 'goalPassengers', { count: number(goal.target) });
 }
-export const canPlanGoal = (w: World) => reserved(w, 'marshrutka') > 0 && w.routes.length < E.maxRoutes;
+export const canPlanGoal = (w: World) => MODES.some(mode=>unlocked(w,mode)&&reserved(w,mode)>0) && w.routes.length < E.maxRoutes;
 export function goalDetail(w: World, goal: Goal) {
   const progress = goalProgress(w, goal);
   return `<h2>${goalTitle(w, goal)}</h2><p>${t('goalHint'+goal.kind)}</p><p>${t('goalProgress', { current: number(progress.current), target: number(progress.target) })} · ${t('goalReward', { count: number(GOALS[goal.slot].reward) })}</p>`;
