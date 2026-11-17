@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { daylight } from '../src/render/atmosphere';
+import { Atmosphere, daylight } from '../src/render/atmosphere';
+import { Scene, MeshBasicMaterial } from 'three';
 import { readSettings, writeSettings, SETTINGS_KEY } from '../src/core/settings';
 import { MapCamera } from '../src/render/camera';
 
@@ -14,6 +15,17 @@ describe('визуальное время', () => {
   });
   it('фиксированное освещение не зависит от времени города', () => {
     for (const minute of [0, 360, 1200, 700000]) { expect(daylight(minute, 'day')).toBe(1); expect(daylight(minute, 'night')).toBe(0); }
+  });
+  it('сглаживает свет, окна и погоду даже при переключении настроек на паузе', () => {
+    const windows = new MeshBasicMaterial(), scene = new Scene(), atmosphere = new Atmosphere(scene, windows);
+    expect(atmosphere.update(0, 'day')).toBe(1);
+    const before = windows.color.clone(), sky = scene.background!.clone() as typeof windows.color;
+    const value = atmosphere.update(0, 'night', 'rain', 1 / 60);
+    expect(value).toBeGreaterThan(.96); expect(value).toBeLessThan(1);
+    expect(windows.color.clone().sub(before).toArray().every(value => Math.abs(value) < .05)).toBe(true);
+    expect((scene.background as typeof windows.color).clone().sub(sky).toArray().every(value => Math.abs(value) < .05)).toBe(true);
+    for (let frame = 0; frame < 300; frame++) atmosphere.update(0, 'night', 'rain', 1 / 60);
+    expect(atmosphere.update(0, 'night')).toBeLessThan(.001);
   });
 });
 describe('настройки отдельно от прогресса', () => {
@@ -53,5 +65,16 @@ describe('камера', () => {
     pointer(canvas, 'pointerup', 1, 130, 380); pointer(canvas, 'pointerup', 2, 240, 460);
     controls.update(1); expect(stops).toEqual([]); expect(controls.zoom).toBeGreaterThan(1);
     expect(Number.isFinite(controls.camera.position.x)).toBe(true);
+  });
+  it('в редакторе перетаскивание пустого места перемещает карту без новых остановок и поворота', () => {
+    const { controls, canvas } = create(); controls.building = true;
+    const stops: number[] = []; controls.onStop = id => stops.push(id);
+    const center = controls.center.clone(), direction = controls.camera.position.clone().sub(controls.center).normalize();
+    pointer(canvas, 'pointerdown', 1, 195, 422);
+    pointer(canvas, 'pointermove', 1, 245, 452); pointer(canvas, 'pointerup', 1, 245, 452);
+    controls.update(1);
+    expect(controls.center.distanceTo(center)).toBeGreaterThan(.5);
+    expect(controls.camera.position.clone().sub(controls.center).normalize().distanceTo(direction)).toBeLessThan(.001);
+    expect(stops).toEqual([]);
   });
 });

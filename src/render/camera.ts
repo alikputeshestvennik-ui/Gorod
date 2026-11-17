@@ -65,7 +65,7 @@ export class MapCamera {
       this.canvas.setPointerCapture(e.pointerId); this.pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
       if (this.pointers.size === 1) {
         const stop = (e.target as HTMLElement).closest?.<HTMLElement>('[data-stop]')?.dataset.stop;
-        this.drag = { x: e.clientX, y: e.clientY, moved: false, multi: false, stop: stop === undefined ? null : Number(stop) };
+        this.drag = { x: e.clientX, y: e.clientY, moved: false, multi: false, stop: stop === undefined ? this.pick(e.clientX, e.clientY) : Number(stop) };
       }
       else if (this.drag) this.drag.multi = true;
     });
@@ -85,10 +85,10 @@ export class MapCamera {
       } else if (!this.drag.multi) {
         if (!this.drag.moved && Math.hypot(e.clientX - this.drag.x, e.clientY - this.drag.y) > 8) {
           this.drag.moved = true;
-          if (this.building) { const id = this.drag.stop ?? this.pick(this.drag.x, this.drag.y); if (id !== null) this.onStop(id); }
+          if (this.building && this.drag.stop !== null) this.onStop(this.drag.stop);
         }
         if (this.drag.moved) {
-          if (this.building) { const id = this.pick(e.clientX, e.clientY); if (id !== null) this.onStop(id); }
+          if (this.building && this.drag.stop !== null) { const id = this.pick(e.clientX, e.clientY); if (id !== null) this.onStop(id); }
           else this.pan(dx, dy);
         }
       }
