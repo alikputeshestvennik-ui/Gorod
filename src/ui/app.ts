@@ -156,6 +156,7 @@ export class GameUI {
       const button=document.querySelector<HTMLButtonElement>('#confirm')!;
       const mode=this.world.routes.find(r=>r.id===routeId)?.mode??this.mode;
       button.textContent=t(routeId?'editConfirm':'confirm',{cost:number(constructionCost(this.world,draft,mode,routeId))});button.disabled=draft.length<2;
+      document.getElementById('app')!.style.setProperty('--build-height',`${document.getElementById('build-bar')!.offsetHeight}px`);
     }
   }
   resetDraftEnd(){document.querySelector<HTMLSelectElement>('#draft-end')!.value='end';}
