@@ -55,6 +55,8 @@ export class GameUI {
     this.mapHost=document.querySelector('#map')!;this.modal=document.querySelector('#modal')!;
     const buildBar=document.getElementById('build-bar')!;
     new ResizeObserver(()=>host.style.setProperty('--build-height',`${buildBar.offsetHeight}px`)).observe(buildBar);
+    const tools=document.querySelector<HTMLElement>('.map-tools')!;
+    new ResizeObserver(()=>host.style.setProperty('--tools-height',`${tools.offsetHeight}px`)).observe(tools);
     const board=document.getElementById('goal-board')!;
     new ResizeObserver(()=>host.style.setProperty('--goals-height',`${board.offsetHeight}px`)).observe(board);
     const click=(id:string,fn:()=>void)=>{document.getElementById(id)!.onclick=fn;};

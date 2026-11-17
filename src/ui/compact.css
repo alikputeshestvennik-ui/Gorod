@@ -22,6 +22,8 @@ header{height:44px}.header-actions button{padding:6px;width:44px}
 #goal-toggle[aria-expanded="true"]{background:var(--green);color:var(--lime)}
 #growth{display:none}.stats-open #growth{display:block;position:absolute;bottom:50px;left:0}
 .zoom{bottom:calc(var(--bottom) + 111px + var(--goals-height,0px));gap:3px}
+.editing .zoom{top:calc(var(--top) + 106px + var(--tools-height,92px));bottom:auto}
+.editing.stats-open .zoom{top:calc(var(--top) + 155px + var(--tools-height,92px))}
 .zoom button{font-size:18px;padding:5px;background:#fcfdf5cf}.rotate-tools{gap:3px}
 .map-bottom{bottom:calc(var(--bottom) + 59px)}
 .speed button{font-size:11px;padding:5px 8px}
@@ -45,7 +47,7 @@ nav{box-shadow:0 3px 10px #284c3018}nav button{font-size:11px}
   .stats-open .map-tools{top:calc(var(--top) + 98px)}
   #goal-toggle{left:calc(var(--left) + 320px);bottom:var(--bottom)}
   .map-bottom{bottom:var(--bottom);left:auto;right:var(--right)}
-  .zoom,.editing .zoom{right:calc(var(--right) + min(360px,44vw) + 10px);bottom:calc(var(--bottom) + 60px)}
+  .zoom,.editing .zoom,.editing.stats-open .zoom{top:auto;right:calc(var(--right) + min(360px,44vw) + 10px);bottom:calc(var(--bottom) + 60px)}
   #debug{left:var(--left);bottom:calc(var(--bottom) + 60px)}.goals-open #debug{bottom:calc(var(--bottom) + 60px)}
   #goal-celebration{left:auto;right:var(--right);width:min(360px,44vw);bottom:calc(var(--bottom) + 66px + var(--goals-height,0px))}
   #engagement-debug{left:var(--left);bottom:calc(var(--bottom) + 85px);max-width:290px}

@@ -19,9 +19,9 @@ test('стройка, новый квартал, маршрут к нему и �
   const w=createWorld();step(w,E.minutesPerDay*C.constructionDays);
   await prepare(page,w);await page.locator('#zoom-out').click();await page.locator('#zoom-out').click();
   await expect(page.locator('.stop-label')).toHaveCount(13);
-  await page.locator('#growth').click();await expect(page.locator('#modal')).toContainText('Жители прибывают каждый игровой день');
+  await page.locator('#stats-toggle').click();await page.locator('#growth').click();await expect(page.locator('#modal')).toContainText('Жители прибывают каждый игровой день');
   await expect(page.locator('#modal')).toContainText('Восточный квартал');await expect(page.locator('#modal')).toContainText('Такси:');await page.locator('#close').click();
-  await page.screenshot({path:'artifacts/living-new-quarter.png'});
+  await page.locator('#stats-toggle').click();await page.screenshot({path:'artifacts/living-new-quarter.png'});
   await page.getByRole('button',{name:'Восточный квартал',exact:true}).click();
   await page.getByRole('button',{name:'Заречье',exact:true}).click();await expect(page.locator('#selection')).toContainText('Восточный квартал');
   await page.locator('#confirm').click();await expect(page.locator('.route-card')).toHaveCount(2);
@@ -48,7 +48,7 @@ test('снег, ливень, ремонт, матч и ночное виден�
     await page.locator('#layer-'+layer).click();await expect(page.locator('#map')).toHaveAttribute('data-layers',layer);
     expect(await page.locator('#map').evaluate(el=>{
       const effect=getComputedStyle(el,'::after');
-      return effect.content!=='none'&&effect.backgroundImage!=='none'&&effect.pointerEvents==='none';
+      return effect.content!=='none'&&effect.backgroundImage==='none'&&effect.backgroundColor!=='rgba(0, 0, 0, 0)'&&effect.pointerEvents==='none'&&getComputedStyle(el).filter==='none';
     })).toBe(true);
     await page.screenshot({path:`artifacts/living-layer-${layer}.png`});await page.locator('#layer-'+layer).click();
   }
