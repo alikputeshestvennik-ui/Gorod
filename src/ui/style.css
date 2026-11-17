@@ -4,9 +4,8 @@
 @media(max-height:500px) and (min-width:600px){.zoom{bottom:calc(var(--bottom) + 60px);gap:3px}.zoom>button{min-height:44px;height:44px;padding:3px}.rotate-tools button{min-height:44px}}
 @media(max-height:500px) and (min-width:600px){header{width:225px}.city-name{min-width:0;padding:8px 6px}.city-name b{font-size:12px;white-space:nowrap}.header-actions{gap:3px}.header-actions button{padding:8px}.stats{left:calc(var(--left) + 235px)}}
 
-/* Neutral night vision preserves the colour of each independent overlay. */
-#map[data-layers]:not([data-layers=""]) canvas{filter:brightness(.85) contrast(1.1)}
-#map[data-layers]:not([data-layers=""])::after{content:"";position:absolute;inset:0;pointer-events:none;background:repeating-linear-gradient(0deg,#0000 0px,#0000 3px,#001b1822 4px);box-shadow:inset 0 0 80px #00150f66}
+/* A tint preserves overlay colours without filtering the animated WebGL canvas each frame. */
+#map[data-layers]:not([data-layers=""])::after{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(#00150f1a,#00150f1a),repeating-linear-gradient(0deg,#0000 0px,#0000 3px,#001b1822 4px);box-shadow:inset 0 0 80px #00150f66}
 .map-tools{display:grid;grid-template-columns:minmax(0,1fr) 44px;width:calc(100% - var(--left) - var(--right));max-width:360px;pointer-events:none}
 .map-tools>*,.layer-buttons{pointer-events:auto}
 .layer-buttons{display:flex;gap:5px;min-width:0}
