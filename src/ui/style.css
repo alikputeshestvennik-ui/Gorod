@@ -29,12 +29,15 @@
 #demand-direction{margin-top:3px}
 #demand-advice #demand-suggest{background:var(--green);color:var(--lime);text-align:center;margin-top:4px}
 .editing #demand-advice,.panel-open #demand-advice{display:none}
-.editing .zoom{bottom:calc(var(--bottom) + 315px)}
+.zoom,.rotate-tools{pointer-events:none}
+.zoom button{pointer-events:auto}
+.editing .zoom{display:flex;bottom:calc(var(--bottom) + 70px + var(--build-height,260px))}
+.speed{margin-left:auto}
 #engagement-debug{position:absolute;z-index:8;left:var(--left);bottom:calc(var(--bottom) + 142px);max-width:calc(100% - var(--left) - var(--right) - 100px);padding:8px;border-radius:8px;white-space:pre-line;line-height:1.5;font-size:10px;background:#142d27f5;color:#d6eda0;pointer-events:none}
 .editing #debug,.editing #engagement-debug{z-index:8}
 @media(max-height:500px) and (min-width:600px){
   #build-bar{left:auto;right:var(--right);width:min(360px,44vw);max-height:calc(100dvh - var(--top) - var(--bottom) - 78px)}
-  .editing .zoom{right:calc(var(--right) + min(360px,44vw) + 10px);bottom:calc(var(--bottom) + 60px)}
+  .editing .zoom{display:grid;right:calc(var(--right) + min(360px,44vw) + 10px);bottom:calc(var(--bottom) + 60px)}
   #demand-advice{left:340px;bottom:calc(var(--bottom) + 114px);width:240px}
   #engagement-debug{left:340px;bottom:calc(var(--bottom) + 60px);max-width:320px}
 }

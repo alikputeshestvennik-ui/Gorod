@@ -6,6 +6,13 @@ for (const viewport of [{ width: 390, height: 844 }, { width: 844, height: 390 }
     await page.getByRole('button', { name: 'Пауза', exact: true }).click();
     await page.getByRole('button', { name: 'Маршруты', exact: true }).click();
     await page.locator('[data-edit="1"]').click();
+    for (const id of ['rotate-left','rotate-right','zoom-in','zoom-out','recenter']) {
+      expect(await page.locator('#'+id).evaluate(el=>{
+        const b=el.getBoundingClientRect();
+        return b.x>=0&&b.y>=0&&b.right<=innerWidth&&b.bottom<=innerHeight&&
+          el.contains(document.elementFromPoint(b.x+b.width/2,b.y+b.height/2));
+      }), `camera button ${id} is reachable`).toBe(true);
+    }
     const draft = await page.locator('#selection').textContent();
     const stop = page.getByRole('button', { name: 'Больница', exact: true });
     const before = (await stop.boundingBox())!;

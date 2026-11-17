@@ -46,6 +46,8 @@ export class GameUI {
       <nav>${['map','routes','fleet','finance'].map(key=>`<button data-tab="${key}" class="${key==='map'?'active':''}">${t(key)}</button>`).join('')}</nav>
       <dialog id="modal"><div id="dialog-body"></div><button id="close">${t('close')}</button></dialog><div id="toast" role="status"></div>`;
     this.mapHost=document.querySelector('#map')!;this.modal=document.querySelector('#modal')!;
+    const buildBar=document.getElementById('build-bar')!;
+    new ResizeObserver(()=>host.style.setProperty('--build-height',`${buildBar.offsetHeight}px`)).observe(buildBar);
     const click=(id:string,fn:()=>void)=>{document.getElementById(id)!.onclick=fn;};
     click('settings',()=>this.showSettings());
     click('growth',()=>this.showDialog(cityReport(this.world)));
