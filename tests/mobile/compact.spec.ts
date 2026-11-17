@@ -6,6 +6,7 @@ for(const viewport of [{width:390,height:844},{width:844,height:390},{width:320,
     await page.getByRole('button',{name:'Пауза',exact:true}).click();
     await expect(page.locator('#goal-board')).toBeHidden();
     await expect(page.locator('#satisfaction')).toBeHidden();
+    if(viewport.width>viewport.height)expect((await page.locator('.zoom').boundingBox())!.x).toBeGreaterThan(viewport.width*.8);
     await page.locator('#stats-toggle').click();await expect(page.locator('#satisfaction')).toBeVisible();
     await page.locator('#stats-toggle').click();
     await page.locator('#debug-toggle').click();await expect(page.locator('#debug')).toBeVisible();
