@@ -4,7 +4,7 @@ import { E } from './sim/config';
 import { t } from './core/i18n';
 import { readSettings, writeSettings } from './core/settings';
 import { CityAudio } from './core/audio';
-import { CityMap, type Layer } from './render/map';
+import { CityMap } from './render/map';
 import { GameUI } from './ui/app';
 import './ui/style.css';
 function start(){
@@ -51,7 +51,7 @@ function start(){
   ui.onSpeed=value=>{speed=value;accumulator=0;};ui.onModal=value=>{modal=value;accumulator=0;};
   ui.onReset=()=>{world=createWorld();editing=undefined;draft=null;map.building=false;accumulator=0;persist();refresh();};
   ui.onRotate=delta=>map.rotate(delta);ui.onZoom=factor=>map.changeZoom(factor);ui.onRecenter=()=>map.recenter();
-  ui.onLayer=layer=>{map.layer=layer as Layer;map.update(snapshot,draft??[]);};
+  ui.onLayer=(layer,enabled)=>{if(enabled)map.layers.add(layer);else map.layers.delete(layer);map.update(snapshot,draft??[]);};
   document.addEventListener('keydown',e=>{if(e.key==='Escape'&&draft)cancel();});
   document.addEventListener('visibilitychange',()=>{last=0;accumulator=0;audio.setBlocked(document.hidden);if(document.hidden)persist();});
   window.addEventListener('pagehide',persist);

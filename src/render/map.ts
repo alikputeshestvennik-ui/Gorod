@@ -7,11 +7,11 @@ import { EventView } from './events';
 import { roadPath } from '../sim/roads';
 import { eventConfig } from '../sim/events';
 import { t, number } from '../core/i18n';
+import { MAP_LAYERS, type Layer } from '../core/layers';
 import { MapCamera } from './camera';
 import { Scenery } from './scenery';
 import { Atmosphere } from './atmosphere';
 import type { Settings, Quality } from '../core/settings';
-export type Layer = 'off' | 'demand' | 'load' | 'complaints';
 export class CityMap {
   private scene = new THREE.Scene();
   private controls: MapCamera;
@@ -31,9 +31,8 @@ export class CityMap {
   private actors: Actors;
   private development: DevelopmentView;
   private events: EventView;
-  private heat: THREE.InstancedMesh;
+  private heat = new Map<Layer, THREE.InstancedMesh>();
   private tint=new THREE.Color();
-  private scale=new THREE.Vector3();
   private signature = '';
   private observer: ResizeObserver;
   private width = 1;
@@ -43,7 +42,7 @@ export class CityMap {
   private lastCounter = performance.now() / 1000;
   onStop: (id: number) => void = () => {};
   set building(value: boolean) { this.controls.building = value; }
-  layer: Layer = 'off';
+  readonly layers = new Set<Layer>();
   constructor(private host: HTMLElement) {
     this.renderer = new THREE.WebGLRenderer({ antialias: false, alpha: false, powerPreference: 'low-power' });
     this.renderer.setPixelRatio(Math.min(devicePixelRatio || 1, 2));
@@ -53,9 +52,12 @@ export class CityMap {
     this.scenery = new Scenery(this.scene); this.atmosphere = new Atmosphere(this.scene, this.scenery.windows);
     this.actors = new Actors(this.scene);this.development = new DevelopmentView(this.scene);this.events = new EventView(this.scene);
     this.scene.add(this.lines);
-    this.heat=new THREE.InstancedMesh(new THREE.CircleGeometry(1.55,24),new THREE.MeshBasicMaterial({transparent:true,opacity:0.45,depthWrite:false,depthTest:false}),20);
-    this.heat.renderOrder=4;this.heat.instanceMatrix.setUsage(THREE.DynamicDrawUsage);this.heat.visible=false;this.scene.add(this.heat);
-    this.heat.frustumCulled=false;
+    const shapes=[new THREE.CircleGeometry(1,24),new THREE.RingGeometry(1.1,1.4,24),new THREE.RingGeometry(1.5,1.8,24)];
+    MAP_LAYERS.forEach((layer,index)=>{
+      const heat=new THREE.InstancedMesh(shapes[index],new THREE.MeshBasicMaterial({transparent:true,opacity:0.55,depthWrite:false,depthTest:false}),20);
+      heat.renderOrder=4;heat.instanceMatrix.setUsage(THREE.DynamicDrawUsage);heat.visible=false;heat.frustumCulled=false;
+      this.heat.set(layer.id,heat);this.scene.add(heat);
+    });
     this.observer=new ResizeObserver(()=>this.resize()); this.observer.observe(host);
     this.resize();
   }
@@ -72,14 +74,18 @@ export class CityMap {
   recenter(){this.controls.recenter();}
   get light(){return this.daylight;}
   update(world:World,draft:number[]) {
-    this.controls.districts=world.districts;this.development.update(world);this.host.dataset.layer=this.layer;
+    this.controls.districts=world.districts;this.development.update(world);
+    this.host.dataset.layers=MAP_LAYERS.filter(layer=>this.layers.has(layer.id)).map(layer=>layer.id).join(' ');
     while(this.stops.length>world.districts.length){const stop=this.stops.pop()!;stop.geometry.dispose();(stop.material as THREE.Material).dispose();stop.removeFromParent();this.labels.pop()!.remove();}
     for(let id=this.stops.length;id<world.districts.length;id++){
       const d=world.districts[id];
       const stop=new THREE.Mesh(new THREE.CylinderGeometry(.18,.18,.06,16),new THREE.MeshBasicMaterial({color:'#31896b'}));stop.position.set(d.x,.17,d.y);this.stops.push(stop);this.scene.add(stop);
-      const label=document.createElement('button');label.className='stop-label';label.setAttribute('aria-label',t(d.name));label.dataset.stop=String(d.id);label.onclick=e=>{if(e.detail===0)this.onStop(d.id);};this.host.append(label);this.labels.push(label);
+      const label=document.createElement('button');label.className='stop-label';label.setAttribute('aria-label',t(d.name));label.dataset.stop=String(d.id);label.onclick=e=>{if(e.detail===0)this.onStop(d.id);};
+      const name=document.createElement('span');name.textContent=t(d.name);label.append(name);
+      for(const layer of MAP_LAYERS){const value=document.createElement('span');value.dataset.value=layer.id;value.style.setProperty('--layer-color',layer.color);value.hidden=true;label.append(value);}
+      this.host.append(label);this.labels.push(label);
     }
-    this.heat.count=world.districts.length;
+    for(const [layer,heat] of this.heat){heat.count=world.districts.length;heat.visible=this.layers.has(layer);}
     const signature=JSON.stringify([world.routes.map(r=>[r.id,r.stops,r.vehicles,r.mode]),draft,world.event?.id]);
     if(signature!==this.signature){
       this.signature=signature;
@@ -93,25 +99,29 @@ export class CityMap {
         if(points.length){const line=new THREE.Line(new THREE.BufferGeometry().setFromPoints(points),new THREE.LineBasicMaterial({color:r.id?D.colors[(r.id-1)%D.colors.length]:'#e28e42',depthTest:false}));line.renderOrder=5;this.lines.add(line);}
       }
     }
-    this.heat.visible=this.layer!=='off';
     for(const d of world.districts){
       const waiting=world.queues[d.id].reduce((s,n)=>s+n,0),generated=world.demand[d.id];
       const event=eventConfig(world);
       const capacity=world.routes.filter(r=>r.stops.includes(d.id)&&!(event?.id==='repair'&&r.stops.includes(event.district))).reduce((s,r)=>s+r.vehicles*T[r.mode].capacity,0);
       const load=waiting/Math.max(1,capacity);
       const complaint=generated>0?(capacity?Math.min(1,load):1):0;
-      const intensity=this.layer==='demand'?Math.min(1,generated/15):this.layer==='load'?Math.min(1,load):this.layer==='complaints'?complaint:0;
-      this.tint.set(this.layer==='demand'?'#5bff83':this.layer==='load'?'#40dcff':'#ff784d').multiplyScalar(.12+intensity*.88);
-      this.matrix.makeRotationX(-Math.PI/2);this.scale.setScalar(1+intensity*0.45);this.matrix.scale(this.scale);this.matrix.setPosition(d.x,0.13,d.y);
-      this.heat.setMatrixAt(d.id,this.matrix);this.heat.setColorAt(d.id,this.tint);
+      this.matrix.makeRotationX(-Math.PI/2);this.matrix.setPosition(d.x,0.13,d.y);
+      for(const layer of MAP_LAYERS){
+        const active=this.layers.has(layer.id),value=this.labels[d.id].children[MAP_LAYERS.indexOf(layer)+1] as HTMLElement;value.hidden=!active;
+        if(!active)continue;
+        const intensity=layer.id==='demand'?Math.min(1,generated/15):layer.id==='load'?Math.min(1,load):complaint;
+        this.tint.set(layer.color).multiplyScalar(.12+intensity*.88);
+        const heat=this.heat.get(layer.id)!;heat.setMatrixAt(d.id,this.matrix);heat.setColorAt(d.id,this.tint);
+        const count=layer.id==='demand'?generated.toLocaleString('ru-RU',{maximumFractionDigits:1}):number((layer.id==='load'?load:complaint)*100);
+        value.textContent=t(layer.value,{count});
+      }
       (this.stops[d.id].material as THREE.MeshBasicMaterial).color.set(draft.includes(d.id)?'#e28e42':'#31896b');
       this.stops[d.id].scale.setScalar(draft.includes(d.id)?1.6:1);
-      const count=this.layer==='demand'?number(generated):this.layer==='load'?number(load*100)+'%':number(complaint*100)+'%';
-      this.labels[d.id].textContent=this.layer==='off'?t(d.name):t('layerStop',{name:t(d.name),count});
-      this.labels[d.id].title=this.labels[d.id].textContent??'';
+      this.labels[d.id].classList.toggle('analytical',this.layers.size>0);
+      this.labels[d.id].title=Array.from(this.labels[d.id].children).filter(el=>!(el as HTMLElement).hidden).map(el=>el.textContent).join('\n');
       this.labels[d.id].classList.toggle('selected',draft.includes(d.id));
     }
-    this.heat.instanceMatrix.needsUpdate=true;if(this.heat.instanceColor)this.heat.instanceColor.needsUpdate=true;
+    for(const heat of this.heat.values())if(heat.visible){heat.instanceMatrix.needsUpdate=true;if(this.heat.instanceColor)heat.instanceColor.needsUpdate=true;}
   }
 
   draw(time:number,world:World,dt=1/60){

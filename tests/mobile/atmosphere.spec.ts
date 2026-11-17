@@ -37,7 +37,7 @@ test('3D: день, ночь, качество, камера, жесты и пр
   await expect(page.locator('#selection')).toHaveText(selected!); await page.locator('#cancel').click();
   await page.getByRole('button', { name: 'Карта', exact: true }).click(); await page.locator('#recenter').click();
   await page.locator('#settings').click(); await page.locator('#time-of-day').selectOption('night'); await page.locator('#quality').selectOption('low');
-  await page.locator('#close').click(); await page.locator('#layer').selectOption('load');
+  await page.locator('#close').click(); await page.locator('#layer-load').click();
   await page.screenshot({ path: 'artifacts/city-night.png' });
   await page.setViewportSize({ width: 844, height: 390 }); await page.screenshot({ path: 'artifacts/city-night-landscape.png' });
   console.log('GRAPHICS_CITY_NIGHT', await page.locator('#debug').textContent());

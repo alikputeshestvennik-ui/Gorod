@@ -42,9 +42,9 @@ test('снег, ливень, ремонт, матч и ночное виден�
   
   }
   for(const layer of ['demand','load','complaints']){
-    await page.locator('#layer').selectOption(layer);await expect(page.locator('#map')).toHaveAttribute('data-layer',layer);
-    const filter=await page.locator('canvas').evaluate(el=>getComputedStyle(el).filter);expect(filter).toContain('hue-rotate');
-    await page.screenshot({path:`artifacts/living-layer-${layer}.png`});
+    await page.locator('#layer-'+layer).click();await expect(page.locator('#map')).toHaveAttribute('data-layers',layer);
+    const filter=await page.locator('canvas').evaluate(el=>getComputedStyle(el).filter);expect(filter).toContain('brightness');
+    await page.screenshot({path:`artifacts/living-layer-${layer}.png`});await page.locator('#layer-'+layer).click();
   }
   await expect.poll(()=>page.locator('#map').getAttribute('data-people').then(Number)).toBeGreaterThan(0);
   expect(errors).toEqual([]);

@@ -10,8 +10,8 @@ test('карта на весь экран, редактор, автопарк, �
   await fullMap();expect(await page.locator('.stats strong').evaluateAll(nodes=>nodes.every(el=>el.scrollWidth<=el.clientWidth))).toBe(true);await page.locator('#debug-toggle').click();
   await expect(page.locator('#debug')).toHaveText(/^[1-9]\d* FPS · \d+ calls · \d+ triangles$/);
   console.log('GRAPHICS_PORTRAIT',await page.locator('#debug').textContent());
-  await page.locator('#layer').selectOption('demand');await expect(page.locator('#layer-legend')).toBeVisible();
-  await page.screenshot({path:'artifacts/portrait.png',fullPage:true});await page.locator('#layer').selectOption('off');
+  await page.locator('#layer-demand').click();await expect(page.locator('#layer-legend')).toBeVisible();
+  await page.screenshot({path:'artifacts/portrait.png',fullPage:true});await page.locator('#layer-demand').click();
   await page.getByRole('button',{name:'Маршруты',exact:true}).click();await fullMap();
   await page.getByRole('button',{name:'Создать маршрут',exact:false}).click();
   await page.getByRole('button',{name:'Больница',exact:true}).click();await page.getByRole('button',{name:'Заречье',exact:true}).click();
@@ -37,7 +37,7 @@ test('карта на весь экран, редактор, автопарк, �
   await context.setOffline(true);await page.getByRole('button',{name:'Финансы',exact:true}).click();
   await page.locator('#fare-input').fill('40');await page.locator('#fare-form button').click();await expect(page.locator('#panel')).toContainText('Билет: 40 ₽');
   await page.getByRole('button',{name:'Карта',exact:true}).click();
-  await page.setViewportSize({width:844,height:390});await fullMap();await page.locator('#layer').selectOption('complaints');await page.locator('#debug-toggle').click();
+  await page.setViewportSize({width:844,height:390});await fullMap();await page.locator('#layer-complaints').click();await page.locator('#debug-toggle').click();
   await expect(page.locator('#debug')).toHaveText(/^[1-9]\d* FPS/);console.log('GRAPHICS_LANDSCAPE',await page.locator('#debug').textContent());
   await page.screenshot({path:'artifacts/landscape.png',fullPage:true});
   expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);

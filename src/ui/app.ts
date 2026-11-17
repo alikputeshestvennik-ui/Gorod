@@ -1,4 +1,5 @@
 import { t, number } from '../core/i18n';
+import { MAP_LAYERS, type Layer } from '../core/layers';
 import type { Settings } from '../core/settings';
 import { E } from '../sim/config';
 import { constructionCost } from '../sim/commands';
@@ -19,7 +20,7 @@ export class GameUI {
   private settings: Settings = { version: 1, quality: 'medium', time: 'auto', sound: false };
   onZoom: (factor: number) => void = () => {};
   onRecenter: () => void = () => {};
-  onLayer: (layer: string) => void = () => {};
+  onLayer: (layer: Layer, enabled: boolean) => void = () => {};
   onModal: (open: boolean) => void = () => {};
   private modal: HTMLDialogElement;
   private world!: World;
@@ -32,8 +33,7 @@ export class GameUI {
   constructor(host: HTMLElement) {
     host.innerHTML=`<div id="map"></div><header><div class="city-name"><b>${t('city')}</b><small id="date"></small></div><div class="header-actions"><button id="settings" aria-label="${t('settings')}">⚙</button><button id="help" aria-label="${t('help')}">?</button></div></header>
       <section class="stats">${['budget','population','satisfaction','trust','ecology'].map(key=>`<article><small>${t(key)}</small><strong id="${key}"></strong></article>`).join('')}</section>
-      <div class="map-tools"><select id="layer" aria-label="${t('layerLabel')}">${['off','demand','load','complaints'].map(key=>`<option value="${key}">${t(key)}</option>`).join('')}</select><button id="debug-toggle" aria-label="${t('debug')}">FPS</button></div><output id="layer-legend" hidden></output>
-      <button id="event-banner"></button><div id="crisis" hidden></div>
+      <div class="map-tools"><div class="layer-buttons" role="group" aria-label="${t('layers')}">${MAP_LAYERS.map(layer=>`<button id="layer-${layer.id}" data-layer="${layer.id}" aria-pressed="false" aria-controls="map" style="--layer-color:${layer.color}">${t(layer.id)}</button>`).join('')}</div><button id="debug-toggle" aria-label="${t('debug')}">FPS</button><div id="layer-legend" hidden>${MAP_LAYERS.map(layer=>`<span data-legend="${layer.id}" style="--layer-color:${layer.color}" hidden>${t(layer.legend,{minutes:E.minutesPerTick})}</span>`).join('')}</div><button id="event-banner"></button><div id="crisis" hidden></div></div>
       <div class="zoom"><div class="rotate-tools"><button id="rotate-left" aria-label="${t('rotateLeft')}">↶</button><button id="rotate-right" aria-label="${t('rotateRight')}">↷</button></div><button id="zoom-in" aria-label="${t('zoomIn')}">+</button><button id="zoom-out" aria-label="${t('zoomOut')}">−</button><button id="recenter" aria-label="${t('recenter')}">⌖</button></div><output id="debug" hidden></output>
       <div class="map-bottom"><button id="growth" aria-label="${t('cityReport')}"></button><div class="speed">${[0,1,2].map(n=>`<button data-speed="${n}" class="${n===1?'active':''}" aria-label="${n===0?t('pause'):t('speed')+' '+n}">${n===0?'Ⅱ':n+'×'}</button>`).join('')}</div></div>
       <aside hidden><div class="panel-top"><b id="panel-title"></b><button id="panel-close" aria-label="${t('close')}">×</button></div><div id="panel"></div></aside>
@@ -65,10 +65,13 @@ export class GameUI {
     click('zoom-in',()=>this.onZoom(1.2));click('zoom-out',()=>this.onZoom(1/1.2));click('recenter',()=>this.onRecenter());
     click('debug-toggle',()=>{document.getElementById('debug')!.hidden=!document.getElementById('debug')!.hidden;});
     click('event-banner',()=>{const id=this.world.event?.id??this.world.nextEvent.id;this.showDialog(`<h2>${t(id)}</h2><p>${t(id+'Text')}</p>`);});
-    document.querySelector<HTMLSelectElement>('#layer')!.onchange=e=>{
-      const layer=(e.target as HTMLSelectElement).value;this.onLayer(layer);
-      const legend=document.getElementById('layer-legend')!;legend.hidden=layer==='off';legend.textContent=t('layer'+layer[0].toUpperCase()+layer.slice(1));legend.dataset.layer=layer;
-    };
+    for(const layer of MAP_LAYERS)click('layer-'+layer.id,()=>{
+      const button=document.getElementById('layer-'+layer.id)!;
+      const enabled=button.getAttribute('aria-pressed')!=='true';
+      button.setAttribute('aria-pressed',String(enabled));this.onLayer(layer.id,enabled);
+      document.querySelector<HTMLElement>(`[data-legend="${layer.id}"]`)!.hidden=!enabled;
+      document.getElementById('layer-legend')!.hidden=!document.querySelector('.layer-buttons [aria-pressed="true"]');
+    });
     document.querySelectorAll<HTMLButtonElement>('[data-tab]').forEach(b=>b.onclick=()=>this.openPanel(b.dataset.tab!));
     document.querySelectorAll<HTMLButtonElement>('[data-speed]').forEach(button=>button.onclick=()=>{this.onSpeed(Number(button.dataset.speed));document.querySelectorAll('[data-speed]').forEach(b=>b.classList.toggle('active',b===button));});
     const panel=document.getElementById('panel')!;
