@@ -6,8 +6,16 @@ export interface District {
 }
 export interface Route { id: number; mode: Mode; stops: number[]; vehicles: number; served: number; }
 export interface Ledger { tickets: number; advertising: number; subsidy: number; rent: number; wages: number; energy: number; maintenance: number; depreciation: number; interest: number; construction: number; purchases: number; }
+export type GoalSlot = 'quick' | 'medium' | 'long';
+export type Goal = { id: number; slot: GoalSlot } & (
+  { kind: 'connect'; from: number; to: number } |
+  { kind: 'passengers'; baseline: number; target: number } |
+  { kind: 'coverage'; target: number }
+);
+export interface GoalState { active: Goal[]; nextId: number; completed: number; links: string[]; earned: number; lastCompleted: Goal | null; }
 export interface World {
-  version: 3;
+  version: 4;
+  goals: GoalState;
   development: Development[]; expansion: { index: number; since: number; until: number } | null;
   mobility: { transit: number; taxi: number; car: number; walk: number }; seed: number; minute: number; remainder: number; money: number;
   satisfaction: number; trust: number; ecology: number; districts: District[]; routes: Route[];

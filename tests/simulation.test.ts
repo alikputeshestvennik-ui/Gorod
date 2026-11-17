@@ -50,7 +50,7 @@ describe('команды',()=>{
   it('тратит средства, назначает резерв и не меняет состояние при ошибке',()=>{
     const w=createWorld(),before=w.money;expect(routeCost(3)).toBe(E.routeBaseCost+3*E.stopCost);
     expect(applyCommand(w,{type:'buildRoute',stops:[2,6,7]}).ok).toBe(true);
-    expect(w.money).toBe(before-routeCost(3));expect(reserved(w)).toBe(0);
+    expect(w.money).toBe(before-routeCost(3)+w.goals.earned);expect(reserved(w)).toBe(0);
     const copy=getSnapshot(w);expect(applyCommand(w,{type:'buildRoute',stops:[0,4]}).ok).toBe(false);expect(w).toEqual(copy);
     expect(applyCommand(w,{type:'buyVehicle'}).ok).toBe(true);expect(reserved(w)).toBe(1);
     expect(applyCommand(w,{type:'assignVehicle',routeId:2}).ok).toBe(true);

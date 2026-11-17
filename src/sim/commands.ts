@@ -1,5 +1,6 @@
 import { E, T, MODES } from './config';
 import { routeLength } from './demand';
+import { updateGoals } from './goals';
 import type { Command, Mode, Result, World } from './types';
 export const routeCost = (count: number) => E.routeBaseCost + count * E.stopCost;
 export const reserved = (w: World, mode?: Mode) => mode ? w.fleets[mode] - w.routes.filter(r=>r.mode===mode).reduce((s,r)=>s+r.vehicles,0) : w.fleet-w.routes.reduce((s,r)=>s+r.vehicles,0);
@@ -62,5 +63,5 @@ export function applyCommand(w: World, cmd: Command): Result {
     const amount=Math.min(w.debt,E.loanAmount);if(w.money<amount)return fail('noMoney');
     w.debt-=amount;w.money-=amount;
   } else return fail('invalidCommand');
-  return {ok:true};
+  updateGoals(w); return {ok:true};
 }

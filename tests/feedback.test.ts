@@ -39,7 +39,7 @@ describe('местные показатели темпа', () => {
     const w = createWorld(), metrics = new Engagement(w);
     metrics.advance(50, false); expect(metrics.snapshot().elapsed).toBe(0);
     metrics.advance(20, true); metrics.decision(); metrics.advance(12, true);
-    expect(metrics.snapshot()).toMatchObject({ elapsed: 32, sinceDecision: 12, sinceReward: 32, rewards: 0, decisions: 1, activeGoals: 0 });
+    expect(metrics.snapshot()).toMatchObject({ elapsed: 32, sinceDecision: 12, sinceReward: 32, rewards: 0, decisions: 1, activeGoals: 3 });
     w.event = { id: 'snow', until: 1200 }; metrics.observe(w); metrics.observe(w);
     expect(metrics.snapshot().events).toBe(1);
     w.event = { id: 'snow', until: 2400 }; metrics.observe(w);

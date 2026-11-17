@@ -4,7 +4,8 @@ import type { Settings } from '../core/settings';
 import { E } from '../sim/config';
 import { constructionCost } from '../sim/commands';
 import { cityReport } from './city';
-import { demandAdvice, demandReport } from './demand';
+import { demandReport } from './demand';
+import { canPlanGoal, goalBoard, goalDetail, goalTitle, updateGoalBoard } from './goals';
 import type { Engagement } from '../core/engagement';
 import { routesPanel, fleetPanel, financePanel } from './panels';
 import type { Command, Mode, World } from '../sim/types';
@@ -31,6 +32,7 @@ export class GameUI {
   private panelSignature='';
   private draftSignature='';
   private toastTimer=0;
+  private celebrationTimer=0;
   mode: Mode='marshrutka';
   readonly mapHost: HTMLElement;
   constructor(host: HTMLElement) {
@@ -39,7 +41,8 @@ export class GameUI {
       <div class="map-tools"><div class="layer-buttons" role="group" aria-label="${t('layers')}">${MAP_LAYERS.map(layer=>`<button id="layer-${layer.id}" data-layer="${layer.id}" aria-pressed="false" aria-controls="map" style="--layer-color:${layer.color}">${t(layer.id)}</button>`).join('')}</div><button id="debug-toggle" aria-label="${t('debug')}">FPS</button><div id="layer-legend" hidden>${MAP_LAYERS.map(layer=>`<span data-legend="${layer.id}" style="--layer-color:${layer.color}" hidden>${t(layer.legend,{minutes:E.minutesPerTick})}</span>`).join('')}</div><button id="event-banner"></button><div id="crisis" hidden></div></div>
       <div class="zoom"><div class="rotate-tools"><button id="rotate-left" aria-label="${t('rotateLeft')}">↶</button><button id="rotate-right" aria-label="${t('rotateRight')}">↷</button></div><button id="zoom-in" aria-label="${t('zoomIn')}">+</button><button id="zoom-out" aria-label="${t('zoomOut')}">−</button><button id="recenter" aria-label="${t('recenter')}">⌖</button></div><output id="debug" hidden></output>
       <output id="engagement-debug" hidden></output>
-      <section id="demand-advice"><button id="demand-details" aria-label="${t('demandTitle')}"><small>${t('flowMissing')}</small><b id="demand-direction"></b></button><button id="demand-suggest">${t('flowPlan')}</button></section>
+      ${goalBoard()}
+      <output id="goal-celebration" role="status" hidden></output>
       <div class="map-bottom"><button id="growth" aria-label="${t('cityReport')}"></button><div class="speed">${[0,1,2,4].map(n=>`<button data-speed="${n}" class="${n===1?'active':''}" aria-label="${n===0?t('pause'):t('speed')+' '+n}">${n===0?'Ⅱ':n+'×'}</button>`).join('')}</div></div>
       <aside hidden><div class="panel-top"><b id="panel-title"></b><button id="panel-close" aria-label="${t('close')}">×</button></div><div id="panel"></div></aside>
       <div id="build-bar" hidden><b id="build-hint"></b><small>${t('draftHint')}</small><div id="selection"></div><div class="draft-tools"><select id="draft-end"><option value="end">${t('appendEnd')}</option><option value="start">${t('appendStart')}</option></select><button id="undo">↶</button><button id="clear-draft">${t('clearDraft')}</button></div><div class="build-actions"><button id="cancel">${t('cancel')}</button><button id="confirm" class="primary"></button></div></div>
@@ -48,11 +51,19 @@ export class GameUI {
     this.mapHost=document.querySelector('#map')!;this.modal=document.querySelector('#modal')!;
     const buildBar=document.getElementById('build-bar')!;
     new ResizeObserver(()=>host.style.setProperty('--build-height',`${buildBar.offsetHeight}px`)).observe(buildBar);
+    const board=document.getElementById('goal-board')!;
+    new ResizeObserver(()=>host.style.setProperty('--goals-height',`${board.offsetHeight}px`)).observe(board);
     const click=(id:string,fn:()=>void)=>{document.getElementById(id)!.onclick=fn;};
     click('settings',()=>this.showSettings());
     click('growth',()=>this.showDialog(cityReport(this.world)));
-    click('demand-details',()=>this.showDialog(demandReport(this.world)));
-    click('demand-suggest',()=>{const {flow}=demandAdvice(this.world);if(flow)this.onSuggest([flow.from,flow.to]);});
+    document.getElementById('demand-details')!.setAttribute('aria-label',t('demandTitle'));
+    click('demand-details',()=>this.showDialog(goalDetail(this.world,this.world.goals.active[0])+demandReport(this.world)));
+    click('demand-suggest',()=>{const goal=this.world.goals.active[0];if(goal.kind==='connect'&&canPlanGoal(this.world))this.onSuggest([goal.from,goal.to]);else this.openPanel('routes');});
+    for(const slot of ['medium','long'])click('goal-open-'+slot,()=>{
+      const goal=this.world.goals.active.find(g=>g.slot===slot)!;
+      this.showDialog(goalDetail(this.world,goal)+`<button id="goal-routes" class="primary">${t('goalManage')}</button>`);
+      click('goal-routes',()=>{this.modal.close();this.openPanel('routes');});
+    });
     click('rotate-left',()=>this.onRotate(-Math.PI/6));click('rotate-right',()=>this.onRotate(Math.PI/6));
     this.modal.addEventListener('change',e=>{
       const target=e.target as HTMLElement;if(!target.closest('#settings-form'))return;
@@ -124,8 +135,7 @@ export class GameUI {
     for(const key of ['satisfaction','trust','ecology'] as const)text(key,number(w[key])+'%');
     text('date',t('month',{count:Math.floor(w.minute/(E.minutesPerDay*E.daysPerMonth))+1})+' · '+t('day',{count:Math.floor(w.minute/E.minutesPerDay)%E.daysPerMonth+1}));
     text('growth',t('growth',{count:number(w.lastGrowth)}));
-    const advice=demandAdvice(w);text('demand-direction',advice.text);
-    document.querySelector<HTMLButtonElement>('#demand-suggest')!.disabled=!advice.flow;
+    updateGoalBoard(w);
     text('event-banner',t(w.event?'eventActive':'forecast',{event:t(w.event?.id??w.nextEvent.id),minutes:Math.max(0,(w.event?.until??w.nextEvent.at)-w.minute)}));
     const crisis=document.getElementById('crisis')!;crisis.hidden=!w.gameOver&&w.trust>=E.crisisTrust;crisis.textContent=t(w.gameOver?'gameOver':'crisis');
     if(!this.tab)return;
@@ -149,6 +159,12 @@ export class GameUI {
     }
   }
   resetDraftEnd(){document.querySelector<HTMLSelectElement>('#draft-end')!.value='end';}
+  celebrate(w:World,reward:number){
+    const goal=w.goals.lastCompleted;if(!goal)return;
+    const el=document.getElementById('goal-celebration')!;
+    el.textContent=t('goalCompleted',{title:goalTitle(w,goal),reward:number(reward)});el.hidden=false;
+    clearTimeout(this.celebrationTimer);this.celebrationTimer=window.setTimeout(()=>{el.hidden=true;},6000);
+  }
   debug(text:string){document.getElementById('debug')!.textContent=text;}
   engagement(metrics: ReturnType<Engagement['snapshot']>){
     document.getElementById('engagement-debug')!.textContent=t('engagementStats',{

@@ -1,6 +1,7 @@
 import { E, D, MODES, EVENTS } from '../sim/config';
 import { createWorld } from '../sim/world';
 import { C, initialDevelopment, initialExpansion } from '../sim/development';
+import { initializeGoals, validGoals } from '../sim/goals';
 import type { World } from '../sim/types';
 export const LEGACY_KEY = 'gorodskoy-marshrut:stage1:v1';
 export const SAVE_KEY = 'gorodskoy-marshrut:stage2:v2';
@@ -8,7 +9,7 @@ const finite = (n: unknown): n is number => typeof n === 'number' && Number.isFi
 export function restore(raw: string): World | null {
   try {
     const parsed = JSON.parse(raw);
-    if (!parsed || ![1,2,3].includes(parsed.version)) return null;
+    if (!parsed || ![1,2,3,4].includes(parsed.version)) return null;
     const base = createWorld();
     if(parsed.version===1){
       parsed.version=2;parsed.ecology=base.ecology;parsed.debt=0;parsed.gameOver=false;
@@ -51,7 +52,8 @@ export function restore(raw: string): World | null {
     if (!Array.isArray(w.demand) || w.demand.length !== w.districts.length || w.demand.some(n => !finite(n) || n < 0)) return null;
     if (!Array.isArray(w.queues) || w.queues.length !== w.districts.length || w.queues.some(q => !Array.isArray(q) || q.length !== w.districts.length || q.some(n => !finite(n) || n < 0))) return null;
     if (w.served < 0 || w.missed < 0 || w.income < 0 || w.expenses < 0 || w.lastGrowth < 0) return null;
-    return w;
+    if (parsed.version === 3) { initializeGoals(w); w.version = 4; }
+    return validGoals(w) ? w : null;
   } catch { return null; }
 }
 export function load(storage: Pick<Storage, 'getItem'>): { world: World; warning?: string } {

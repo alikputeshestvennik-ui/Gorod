@@ -11,6 +11,8 @@ export class Engagement {
   private eventKey: string;
   private available: Set<Mode>;
   private previousTrust: number;
+  private completedGoals: number;
+  private activeGoals: number;
   decisions = 0;
   rewards = 0;
   events = 0;
@@ -19,6 +21,7 @@ export class Engagement {
     this.eventKey = this.key(w);
     this.available = new Set(MODES.filter(mode => unlocked(w, mode)));
     this.previousTrust = w.trust;
+    this.completedGoals = w.goals.completed; this.activeGoals = w.goals.active.length;
   }
   private key(w: World) { return w.event ? `${w.event.id}:${w.event.until}` : ''; }
   advance(dt: number, active: boolean) {
@@ -35,13 +38,15 @@ export class Engagement {
     this.previousTrust = w.trust;
     const opened = MODES.filter(mode => !this.available.has(mode) && unlocked(w, mode));
     for (const mode of opened) this.available.add(mode);
-    if (opened.length || inspectionReward) { this.lastReward = this.lastNotable = this.elapsed; this.rewards++; }
+    const goals = Math.max(0, w.goals.completed - this.completedGoals);
+    this.completedGoals = w.goals.completed; this.activeGoals = w.goals.active.length;
+    if (opened.length || inspectionReward || goals) { this.lastReward = this.lastNotable = this.elapsed; this.rewards += goals + Number(Boolean(opened.length || inspectionReward)); }
     return opened;
   }
   snapshot() {
     return { elapsed: Math.floor(this.elapsed), sinceDecision: Math.floor(this.elapsed - this.lastDecision),
       sinceReward: Math.floor(this.elapsed - this.lastReward), rewards: this.rewards, decisions: this.decisions,
-      activeGoals: 0, events: this.events, eventsPerHour: this.elapsed ? this.events * 3600 / this.elapsed : 0,
+      activeGoals: this.activeGoals, events: this.events, eventsPerHour: this.elapsed ? this.events * 3600 / this.elapsed : 0,
       longestIdle: Math.floor(this.longestIdle) };
   }
 }

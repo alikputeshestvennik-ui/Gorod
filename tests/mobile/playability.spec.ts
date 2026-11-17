@@ -45,7 +45,7 @@ test('спрос объясняет направления и создаёт т�
   await expect(page.locator('#modal')).toContainText('Спрос не равен очереди');
   await page.locator('#close').click();
   await context.setOffline(true);
-  await expect(page.locator('#engagement-debug')).toContainText('активных задач: 0');
+  await expect(page.locator('#engagement-debug')).toContainText('активных задач: 3');
   await page.waitForTimeout(22000);
   await expect(page.locator('#engagement-debug')).toContainText('Событий: 1');
   const baseline = await page.locator('#engagement-debug').textContent();

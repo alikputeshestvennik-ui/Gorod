@@ -5,16 +5,18 @@ import { grow } from './growth';
 import { account } from './economy';
 import { updateEvents, eventConfig } from './events';
 import { initialDevelopment, initialExpansion } from './development';
+import { emptyGoals, initializeGoals, updateGoals } from './goals';
 import type { World } from './types';
 export { applyCommand } from './commands';
 export function createWorld(seed = 412781): World {
-  return { version: 3, development: D.districts.map(d => initialDevelopment(d.population)), expansion: initialExpansion(0), mobility: { transit: 0, taxi: 0, car: 0, walk: 0 }, seed: seed >>> 0, minute: 0, remainder: 0, money: E.initialMoney,
+  const world: World = { version: 4, goals: emptyGoals(), development: D.districts.map(d => initialDevelopment(d.population)), expansion: initialExpansion(0), mobility: { transit: 0, taxi: 0, car: 0, walk: 0 }, seed: seed >>> 0, minute: 0, remainder: 0, money: E.initialMoney,
     ecology: E.initialEcology, satisfaction: E.initialSatisfaction, trust: E.initialTrust, districts: structuredClone(D.districts),
     routes: [{ id: 1, mode: 'marshrutka', stops: [0, 1, 2, 3], vehicles: 1, served: 0 }], fleet: E.initialFleet,
     fleets: {marshrutka:E.initialFleet,bus:0,trolleybus:0,tram:0},wear:{marshrutka:0,bus:0,trolleybus:0,tram:0},
     ledger:{tickets:0,advertising:0,subsidy:0,rent:0,wages:0,energy:0,maintenance:0,depreciation:0,interest:0,construction:0,purchases:0},
     debt:0,gameOver:false,event:null,nextEvent:{id:'fair',at:E.firstEventMinute},fare: E.fare, nextRoute: 2, served: 0, missed: 0, income: 0, expenses: 0, lastGrowth: 0,
     demand: D.districts.map(() => 0), queues: D.districts.map(() => D.districts.map(() => 0)) };
+  initializeGoals(world); return world;
 }
 function network(w: World) {
   const event=eventConfig(w);
@@ -74,6 +76,7 @@ function tick(w: World, net: ReturnType<typeof network>): void {
     w.trust += (w.satisfaction - w.trust) * E.trustSmoothing;
   }
   if (w.minute % E.minutesPerDay === 0) { grow(w, true); net.rateHour=-1; }
+  updateGoals(w);
 }
 export function step(world: World, dtMinutes: number): void {
   if (!Number.isFinite(dtMinutes) || dtMinutes < 0) throw new Error('Некорректный шаг времени');

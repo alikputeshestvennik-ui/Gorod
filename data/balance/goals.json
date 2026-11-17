@@ -1,0 +1,5 @@
+{
+  "quick": { "passengers": 100, "reward": 2500 },
+  "medium": { "passengers": 500, "reward": 6000 },
+  "long": { "passengers": 1800, "coverageStep": 2, "minimumCoverage": 8, "reward": 10000 }
+}

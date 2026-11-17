@@ -21,13 +21,18 @@ function start(){
   document.addEventListener('pointerdown',()=>{if(settings.sound)void audio.setEnabled(true);},{once:true});
   let editing:number|undefined,prepend=false;
   let draft:number[]|null=null,speed=1,modal=false,accumulator=0,last=0,visualTime=0,saveElapsed=0,uiElapsed=0;
+  let rewarded=world.goals.earned;
+  const rewards=()=>{
+    if(world.goals.earned<=rewarded)return;
+    ui.celebrate(world,world.goals.earned-rewarded);rewarded=world.goals.earned;audio.cue();persist();
+  };
   const refresh=()=>{snapshot=getSnapshot(world);ui.update(snapshot);map.update(snapshot,draft??[]);ui.build(draft,editing);};
   const persist=()=>{if(!save(world,storage))ui.toast('saveError');};
   const cancel=()=>{draft=null;editing=undefined;map.building=false;accumulator=0;refresh();};
   ui.onCommand=cmd=>{
     const result=applyCommand(world,cmd);if(!result.ok){ui.toast(result.error);return;}
     const messages={buyVehicle:'bought',assignVehicle:'assigned',releaseVehicle:'released',removeRoute:'removed',setFare:'fareChanged',serviceFleet:'serviced',takeLoan:'loanChanged',repayLoan:'loanChanged',editRoute:'edited',buildRoute:'newRoute'};
-    engagement.decision();ui.toast(messages[cmd.type]);audio.cue();persist();refresh();
+    engagement.decision();ui.toast(messages[cmd.type]);audio.cue();rewards();persist();refresh();
   };
   const begin=(id?:number)=>{
     if(world.gameOver){ui.toast('gameOver');return;}
@@ -40,7 +45,7 @@ function start(){
     if(!draft)return;
     const result=applyCommand(world,editing?{type:'editRoute',routeId:editing,stops:draft}:{type:'buildRoute',stops:draft,mode:ui.mode});
     if(!result.ok){ui.toast(result.error);return;}
-    engagement.decision();const message=editing?'edited':'newRoute';cancel();persist();ui.openPanel('routes');ui.toast(message);audio.cue();
+    engagement.decision();const message=editing?'edited':'newRoute';cancel();rewards();persist();ui.openPanel('routes');ui.toast(message);audio.cue();
   };
   ui.onDraft=(action,index)=>{
     if(!draft)return;
@@ -52,7 +57,7 @@ function start(){
   };
   map.onStop=id=>{if(!draft)begin();if(draft&&!draft.includes(id)){prepend?draft.unshift(id):draft.push(id);refresh();}};
   ui.onSpeed=value=>{speed=value;accumulator=0;};ui.onModal=value=>{modal=value;accumulator=0;};
-  ui.onReset=()=>{world=createWorld();engagement=new Engagement(world);editing=undefined;draft=null;map.building=false;accumulator=0;persist();refresh();};
+  ui.onReset=()=>{world=createWorld();rewarded=world.goals.earned;engagement=new Engagement(world);editing=undefined;draft=null;map.building=false;accumulator=0;persist();refresh();};
   ui.onRotate=delta=>map.rotate(delta);ui.onZoom=factor=>map.changeZoom(factor);ui.onRecenter=()=>map.recenter();
   ui.onLayer=(layer,enabled)=>{if(enabled)map.layers.add(layer);else map.layers.delete(layer);map.update(snapshot,draft??[]);};
   document.addEventListener('keydown',e=>{if(e.key==='Escape'&&draft)cancel();});
@@ -67,7 +72,7 @@ function start(){
       if(uiElapsed>=0.4){
         uiElapsed=0;const opened=engagement.observe(world);
         if(opened.length)ui.toast('transportOpened',{modes:opened.map(mode=>t(mode)).join(', ')});
-        refresh();ui.debug(map.stats());ui.engagement(engagement.snapshot());
+        rewards();refresh();ui.debug(map.stats());ui.engagement(engagement.snapshot());
       }
       if(saveElapsed>=10){saveElapsed=0;persist();}
       map.draw(visualTime,snapshot,dt,world.minute+accumulator/E.realSecondsPerTick*E.minutesPerTick);audio.update(map.light,Boolean(speed)&&!modal&&draft===null&&!world.gameOver);
